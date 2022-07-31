@@ -1,1 +1,1 @@
-rootProject.name = "com.gelugu.home.home-back"
+rootProject.name = "home-back"
