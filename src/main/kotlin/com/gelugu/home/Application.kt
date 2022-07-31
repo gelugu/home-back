@@ -10,12 +10,9 @@ import io.ktor.server.plugins.cors.routing.*
 import org.jetbrains.exposed.sql.Database
 
 fun main() {
-    Database.connect(
-        url = "jdbc:postgresql://${ApplicationConfig.dbUrl}:${ApplicationConfig.dbPort}/${ApplicationConfig.dbName}",
-        driver = "org.postgresql.Driver",
-        user = ApplicationConfig.dbUser,
-        password = ApplicationConfig.dbPassword
-    )
+    checkEnvironment()
+
+    connectDatabase()
 
     embeddedServer(
         factory = CIO,
