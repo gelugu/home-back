@@ -18,12 +18,19 @@ fun main() {
         port = ApplicationConfig.serverPort.toInt(),
         host = "0.0.0.0",
     ) {
+        val logger = log
         install(CORS) {
-            allowSameOrigin = true
-            allowHost("0.0.0.0:3000")
-            allowHeader(HttpHeaders.ContentType)
-            allowHeader(HttpHeaders.Accept)
+            allowMethod(HttpMethod.Options)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Delete)
+            allowMethod(HttpMethod.Patch)
             allowHeader(HttpHeaders.Authorization)
+            allowHeader(HttpHeaders.AccessControlAllowOrigin)
+            allowNonSimpleContentTypes = true
+            allowCredentials = true
+            allowSameOrigin = true
+            allowHost("localhost:3000", listOf("http"))
+            logger.info("CORS enabled for $hosts")
         }
         configureRouting()
         configureRegistrationRouting()
