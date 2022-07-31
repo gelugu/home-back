@@ -15,7 +15,14 @@ import java.util.*
 fun Application.configureLoginRouting() {
   routing {
     get("/send-code") {
-      val bot = TelegramBot(ApplicationConfig.telegramBotToken, ApplicationConfig.telegramChatId)
+      if (InMemoryCache.telegramToken.isEmpty()) {
+        call.respond(HttpStatusCode.InternalServerError, "No telegram token")
+      }
+      if (InMemoryCache.telegramChatId.isEmpty()) {
+        call.respond(HttpStatusCode.InternalServerError, "No telegram chat id")
+      }
+
+      val bot = TelegramBot(InMemoryCache.telegramToken, InMemoryCache.telegramChatId)
 
       InMemoryCache.code = (1..4)
         .map { ('0'..'9').random() }
@@ -24,26 +31,35 @@ fun Application.configureLoginRouting() {
 
       if (responseCode.value == 200) {
         call.respondText { "Check code in telegram bot" }
+        InMemoryCache.codeDate = Date()
+        call.application.log.info("New code saved in memory (${InMemoryCache.codeDate})")
+        return@get
       } else {
         call.respond(
           HttpStatusCode.BadRequest,
           "Can't send request to telegram bot. Check server logs"
         )
       }
-
-      return@get
     }
     post("/login") {
       val code = call.receive<LoginReceiveModel>().code
+
+      if (InMemoryCache.codeDate.time + ApplicationConfig.codeExpirationTime < Date().time) {
+        val msg = "Code expired"
+        call.application.log.error(msg)
+        call.respond(HttpStatusCode.Unauthorized, msg)
+      }
+
       if (code == InMemoryCache.code) {
         InMemoryCache.token = UUID.randomUUID().toString()
+        InMemoryCache.tokenDate = Date()
+        call.application.log.info("New token saved in memory (${InMemoryCache.tokenDate})")
         call.respond(LoginRespondModel(InMemoryCache.token))
         return@post
       } else {
-        call.respond(
-          HttpStatusCode.Unauthorized,
-          "Incorrect authorization code"
-        )
+        val msg = "Incorrect authorization code"
+        call.application.log.error(msg)
+        call.respond(HttpStatusCode.Unauthorized, msg)
       }
     }
   }

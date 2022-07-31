@@ -4,6 +4,7 @@ import com.gelugu.home.configurations.ApplicationConfig
 import io.ktor.server.engine.*
 import io.ktor.server.cio.*
 import com.gelugu.home.plugins.*
+import com.gelugu.home.routing.registration.configureRegistrationRouting
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.*

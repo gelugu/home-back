@@ -1,5 +1,6 @@
 package com.gelugu.home.features
 
+import com.gelugu.home.database.registration.RegistrationRespondModel
 import io.ktor.http.*
 import java.net.ConnectException
 import java.net.URI
@@ -12,11 +13,18 @@ class TelegramBot(
   private val telegramBotToken: String,
   private val chatId: String = ""
 ) {
-  fun getLastChatId(): String {
+  fun getLastChatId(): RegistrationRespondModel {
     val response = sendRequest("getUpdates")
-    println("CHAT ID RESPONSE")
-    println(response.body())
-    return response.body()
+
+    val chatRegex = "chat\":\\{\"id\":\\d+".toRegex()
+    val chatId = chatRegex.find(response.body())!!.value
+      .replace("chat\":{\"id\":", "")
+
+    val usernameRegex = "username\":\"[\\da-zA-Z]+".toRegex()
+    val username = usernameRegex.find(response.body())!!.value
+      .replace("username\":\"", "")
+
+    return RegistrationRespondModel(username, chatId)
   }
 
   fun sendMessage(text: String): HttpStatusCode {

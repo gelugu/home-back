@@ -12,24 +12,5 @@ fun Application.configureRouting() {
         get("/") {
             call.respond(HttpStatusCode.OK, "Home server started")
         }
-        get("/status") {
-            if (ApplicationConfig.telegramBotToken.isEmpty()) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "No telegram bot token"
-                )
-                return@get
-            }
-            if (ApplicationConfig.telegramChatId.isEmpty()) {
-                call.respond(
-                    HttpStatusCode.Unauthorized,
-                    "No telegram chat id"
-                )
-                return@get
-            }
-
-            call.respond(HttpStatusCode.OK)
-            return@get
-        }
     }
 }

@@ -5,6 +5,8 @@ object ApplicationConfig {
   val serverPort = System.getenv("SERVER_PORT") ?: "8080"
   var telegramBotToken = System.getenv("TELEGRAM_BOT_API") ?: ""
   var telegramChatId = System.getenv("TELEGRAM_CHAT_ID") ?: ""
+  const val codeExpirationTime = 300000 // 5 minutes in milliseconds
+  const val tokenExpirationTime = 3.6e+6 // 5 minutes in milliseconds
 
   // database
   val dbUrl = System.getenv("DB_URL") ?: "localhost"
