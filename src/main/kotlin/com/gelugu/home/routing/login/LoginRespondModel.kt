@@ -1,4 +1,4 @@
-package com.gelugu.home.database.login
+package com.gelugu.home.routing.login
 
 import kotlinx.serialization.Serializable
 

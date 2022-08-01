@@ -1,11 +1,11 @@
 -- create tasks table --
 CREATE TABLE tasks(
-	id VARCHAR NOT NULL,
+	id VARCHAR(64) NOT NULL,
 	name VARCHAR(64) NOT NULL,
 	description TEXT,
 	open BOOLEAN,
 
-	PRIMARY KEY(id)
+	PRIMARY KEY(task_id)
 );
 
 -- add test values into tasks table --

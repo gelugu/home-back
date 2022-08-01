@@ -1,11 +1,8 @@
 package com.gelugu.home.routing.registration
 
 import com.gelugu.home.cache.InMemoryCache
-import com.gelugu.home.database.registration.RegistrationTokenModel
-import com.gelugu.home.database.registration.RegistrationChatModel
 import com.gelugu.home.features.TelegramBot
 import com.gelugu.home.routing.exceptions.InternalServerError
-import com.gelugu.home.routing.exceptions.UnauthorizedRespond
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

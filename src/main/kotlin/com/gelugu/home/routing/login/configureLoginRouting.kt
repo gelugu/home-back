@@ -1,9 +1,7 @@
-package com.gelugu.home.plugins
+package com.gelugu.home.routing.login
 
 import com.gelugu.home.cache.InMemoryCache
 import com.gelugu.home.configurations.ApplicationConfig
-import com.gelugu.home.database.login.LoginRespondModel
-import com.gelugu.home.database.login.LoginReceiveModel
 import com.gelugu.home.features.TelegramBot
 import io.ktor.http.*
 import io.ktor.server.application.*

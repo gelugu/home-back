@@ -1,8 +1,7 @@
 package com.gelugu.home.features
 
-import com.gelugu.home.database.registration.RegistrationRespondModel
+import com.gelugu.home.routing.registration.StatusRespondModel
 import io.ktor.http.*
-import java.net.ConnectException
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
@@ -13,7 +12,7 @@ class TelegramBot(
   private val telegramBotToken: String,
   private val chatId: String = ""
 ) {
-  fun getLastChatId(): RegistrationRespondModel {
+  fun getLastChatId(): StatusRespondModel {
     val response = sendRequest("getUpdates")
 
     val chatRegex = "chat\":\\{\"id\":\\d+".toRegex()
@@ -24,7 +23,7 @@ class TelegramBot(
     val username = usernameRegex.find(response.body())!!.value
       .replace("username\":\"", "")
 
-    return RegistrationRespondModel(username, chatId)
+    return StatusRespondModel(username, chatId)
   }
 
   fun sendMessage(text: String): HttpStatusCode {

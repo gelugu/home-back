@@ -1,4 +1,4 @@
-package com.gelugu.home.database.registration
+package com.gelugu.home.routing.registration
 
 @kotlinx.serialization.Serializable
 data class RegistrationTokenModel(
