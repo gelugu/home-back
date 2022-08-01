@@ -19,20 +19,17 @@ fun Application.configureRegistrationRouting() {
       if (InMemoryCache.telegramToken.isEmpty()) {
         call.respond(
           HttpStatusCode.InternalServerError,
-          UnauthorizedRespond("No telegram bot token")
+          "No telegram bot token"
         )
-        return@get
-      }
-      if (InMemoryCache.telegramChatId.isEmpty()) {
+      } else if (InMemoryCache.telegramChatId.isEmpty()) {
         call.respond(
           HttpStatusCode.InternalServerError,
-          UnauthorizedRespond("No telegram chat id")
+          "No telegram chat id"
         )
+      } else {
+        call.respond(HttpStatusCode.OK)
         return@get
       }
-
-      call.respond(HttpStatusCode.OK)
-      return@get
     }
     post("/register/bot") {
       val token = call.receive<RegistrationTokenModel>().token
