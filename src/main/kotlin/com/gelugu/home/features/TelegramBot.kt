@@ -1,29 +1,36 @@
 package com.gelugu.home.features
 
 import com.gelugu.home.routing.registration.StatusRespondModel
+import com.gelugu.home.routing.registration.TelegramUpdateRespond
+import com.gelugu.home.routing.registration.TelegramUpdateRespondChat
 import io.ktor.http.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.util.Collections.max
 
 class TelegramBot(
   private val telegramBotToken: String,
   private val chatId: String = ""
 ) {
-  fun getLastChatId(): StatusRespondModel {
-    val response = sendRequest("getUpdates")
+  fun getLastChatId(): TelegramUpdateRespondChat {
+    val responseString = sendRequest("getUpdates").body()
 
-    val chatRegex = "chat\":\\{\"id\":\\d+".toRegex()
-    val chatId = chatRegex.find(response.body())!!.value
-      .replace("chat\":{\"id\":", "")
+    if (!responseString.contains("\"ok\":true")) {
+      throw NullPointerException("Telegram token does not exist")
+    }
 
-    val usernameRegex = "username\":\"[\\da-zA-Z]+".toRegex()
-    val username = usernameRegex.find(response.body())!!.value
-      .replace("username\":\"", "")
+    val response = Json.decodeFromString<TelegramUpdateRespond>(responseString)
+    val latestMessageDate = max(response.result.map { it.message.date })
+    val lastMessage = response.result.find { it.message.date == latestMessageDate }
+      ?: throw NullPointerException("Telegram token does not exist")
+    lastMessage.message.chat
 
-    return StatusRespondModel(username, chatId)
+    return lastMessage.message.chat
   }
 
   fun sendMessage(text: String): HttpStatusCode {
@@ -36,7 +43,7 @@ class TelegramBot(
     }
   }
 
-  private fun sendRequest(apiMethod: String, values: Map<String, String> = mapOf()):  HttpResponse<String> {
+  private fun sendRequest(apiMethod: String, values: Map<String, String> = mapOf()): HttpResponse<String> {
     val client = HttpClient.newBuilder().build()
 
     val requestBuilder = HttpRequest.newBuilder()
@@ -54,7 +61,7 @@ class TelegramBot(
 
   private fun formData(data: Map<String, String>): HttpRequest.BodyPublisher? {
 
-    val res = data.map {(k, v) -> "${(k.utf8())}=${v.utf8()}"}
+    val res = data.map { (k, v) -> "${(k.utf8())}=${v.utf8()}" }
       .joinToString("&")
 
     return HttpRequest.BodyPublishers.ofString(res)

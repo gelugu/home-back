@@ -6,7 +6,7 @@ services:
     container_name: home-postgres
     image: postgres:14.4-alpine
     environment:
-      POSTGRES_PASSWORD: home-postgres-pass
+      POSTGRES_PASSWORD: pass
       POSTGRES_USER: home-postgres-user
       POSTGRES_DB: home-postgres-db
       PGDATA: /data/postgres

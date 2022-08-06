@@ -7,21 +7,59 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.util.Date
 import java.util.UUID
 
 fun Application.configureTasksRouting() {
   routing {
     post("/tasks/create") {
-      val task = call.receive<TaskReceiveModel>()
-      Tasks.insert(
-        TaskDTO(
-          id = UUID.randomUUID().toString(),
-          name = task.name,
-          description = task.description,
-          open = true
+      val task = call.receive<TaskCreateDTO>()
+      if (task.name.isNotEmpty()) {
+        call.application.log.info(task.toString())
+        Tasks.create(
+          TaskDTO(
+            id = UUID.randomUUID().toString(),
+            create_date = Date().time,
+            open = true,
+            hidden = false,
+
+            name = task.name,
+            description = task.description ?: "",
+            parent_id = task.parent_id,
+            due_date = task.due_date,
+            schedule_date = task.schedule_date
+          )
         )
-      )
-      call.respond(HttpStatusCode.Created, task)
+        call.respond(HttpStatusCode.Created, task)
+      } else {
+        call.respond(HttpStatusCode.BadRequest, "Can't create task with empty name")
+      }
+    }
+    put("/tasks/{id}") {
+      call.parameters["id"]?.let { id ->
+        try {
+          val task = call.receive<TaskUpdateDTO>()
+          Tasks.update(id, task)
+          call.respond(HttpStatusCode.OK, Tasks.fetchTask(id))
+        } catch (e: NoSuchElementException) {
+          call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+        }
+      } ?: run {
+        call.respond(HttpStatusCode.BadRequest, "Can't update task with id")
+      }
+    }
+    delete("/tasks/{id}") {
+      call.parameters["id"]?.let { id ->
+        try {
+          val task = Tasks.fetchTask(id)
+          Tasks.delete(id)
+          call.respond(HttpStatusCode.OK, task)
+        } catch (e: NoSuchElementException) {
+          call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+        }
+      } ?: run {
+        call.respond(HttpStatusCode.BadRequest, "Can't delete task with id")
+      }
     }
     get("/tasks/{id}") {
       val id = call.parameters["id"]

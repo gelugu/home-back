@@ -11,7 +11,7 @@ object ApplicationConfig {
   // database
   val dbUrl = System.getenv("DB_URL") ?: "localhost"
   val dbPort = System.getenv("DB_PORT") ?: "5432"
-  val dbName = System.getenv("DB_NAME") ?: "home-postgres-db"
-  val dbUser = System.getenv("DB_USER") ?: "home-postgres-user"
-  val dbPassword = System.getenv("DB_PASSWORD") ?: "home-postgres-pass"
+  val dbName = System.getenv("DB_NAME") ?: "home-db"
+  val dbUser = System.getenv("DB_USER") ?: "home-user"
+  val dbPassword = System.getenv("DB_PASSWORD") ?: "home-pass"
 }

@@ -1,28 +1,62 @@
 package com.gelugu.home.database.tasks
 
+import com.gelugu.home.routing.tasks.TaskCreateDTO
+import com.gelugu.home.routing.tasks.TaskUpdateDTO
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.javatime.timestamp
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 object Tasks : Table() {
   private val id = Tasks.varchar("id", 64)
   private val name = Tasks.varchar("name", 64)
-  private val description = Tasks.text("description").nullable()
-  private val open = Tasks.bool("open").nullable()
+  private val description = Tasks.text("description").default("")
+  private val open = Tasks.bool("open").default(true)
+  private val create_date = Tasks.timestamp("create_date").clientDefault{ Date().toInstant() }
+  private val parent_id = Tasks.varchar("parent_id", 64).nullable().default(null)
+  private val due_date = Tasks.timestamp("due_date").nullable().default(null)
+  private val schedule_date = Tasks.timestamp("schedule_date").nullable().default(null)
+  private val hidden = Tasks.bool("hidden").default(false)
 
-  fun insert(taskDTO: TaskDTO) {
+  fun create(taskDTO: TaskDTO) {
     transaction {
-      Tasks.insert {
-        it[id] = taskDTO.id
-        it[name] = taskDTO.name
-        it[description] = taskDTO.description
-        it[open] = taskDTO.open
+      Tasks.insert { task ->
+        task[id] = taskDTO.id
+        task[name] = taskDTO.name
+        task[create_date] = Date(taskDTO.create_date).toInstant()
+        task[description] = taskDTO.description
+        task[open] = taskDTO.open
+        task[parent_id] = taskDTO.parent_id
+        task[due_date] = taskDTO.due_date?.let { Date(it).toInstant() }
+        task[schedule_date] = taskDTO.schedule_date?.let { Date(it).toInstant() }
+        task[hidden] = taskDTO.hidden
       }
+    }
+  }
+
+  fun update(taskId: String, taskDTO: TaskUpdateDTO) {
+    return transaction {
+      Tasks.update({ Tasks.id eq taskId }) { task ->
+        taskDTO.name?.let { task[name] = it }
+        taskDTO.description?.let { task[description] = it }
+        taskDTO.open?.let { task[open] = it }
+        taskDTO.parent_id?.let { task[parent_id] = it }
+        taskDTO.due_date?.let { task[due_date] = Date(it).toInstant() }
+        taskDTO.schedule_date?.let { task[schedule_date] = Date(it).toInstant() }
+        taskDTO.hidden?.let { task[hidden] = it }
+      }
+    }
+  }
+
+  fun delete(taskId: String) {
+    transaction {
+      Tasks.deleteWhere { Tasks.id eq taskId }
     }
   }
 
   fun fetchTasks(): List<TaskDTO> {
     return transaction {
-      Tasks.selectAll()
+      Tasks.selectAll().sortedBy { create_date }
         .map { rowToTask(it) }
     }
   }
@@ -36,7 +70,12 @@ object Tasks : Table() {
   private fun rowToTask(row: ResultRow): TaskDTO = TaskDTO(
     id = row[id],
     name = row[name],
+    create_date = row[create_date].toEpochMilli(),
     description = row[description],
-    open = row[open]
+    open = row[open],
+    parent_id = row[parent_id],
+    due_date = row[due_date]?.toEpochMilli(),
+    schedule_date = row[schedule_date]?.toEpochMilli(),
+    hidden = row[hidden]
   )
 }

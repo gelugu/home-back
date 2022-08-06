@@ -6,6 +6,11 @@ import kotlinx.serialization.Serializable
 class TaskDTO(
   val id: String,
   val name: String,
-  val description: String?,
-  val open: Boolean?
+  val create_date: Long,
+  val description: String,
+  val open: Boolean,
+  val parent_id: String?,
+  val due_date: Long?,
+  val schedule_date: Long?,
+  val hidden: Boolean
 )
