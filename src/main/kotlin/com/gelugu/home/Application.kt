@@ -32,7 +32,7 @@ fun main() {
             allowNonSimpleContentTypes = true
             allowCredentials = true
             allowSameOrigin = true
-            allowHost("localhost:3000", listOf("http"))
+            allowHost("localhost:3000", "home.gelugu.com", listOf("http", "https"))
             logger.info("CORS enabled for $hosts")
         }
         configureRouting()
