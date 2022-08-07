@@ -1,0 +1,20 @@
+name: Build and push docker image
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file cicd/Dockerfile --tag gelugu/home-back:0.0.1
+    - name: Docker login
+      run: docker login -u gelugu -p ${{secrets.DOCKER_HUB_TOKEN}}
+    - name: Push the Docker image
+      run: docker push gelugu/home-back:0.0.1
