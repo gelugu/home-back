@@ -15,6 +15,6 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file cicd/Dockerfile --tag gelugu/home-back:0.0.1
     - name: Docker login
-      run: docker login -u gelugu -p ${{DOCKER_HUB_TOKEN}}
+      run: docker login -u gelugu -p ${{secrets.DOCKER_HUB_TOKEN}}
     - name: Push the Docker image
       run: docker push gelugu/home-back:0.0.1
