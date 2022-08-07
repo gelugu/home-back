@@ -2,6 +2,21 @@ version: "3.7"
 
 services:
 
+  home-back:
+    container_name: home-back
+    image: gelugu/home-db:0.0.1
+    environment:
+      DB_URL: home-postgres
+      DB_NAME: home-postgres-db
+      DB_PORT: "5432"
+      DB_USER: home-postgres-user
+      DB_PASSWORD: pass
+    ports:
+      - "8080:8080"
+    networks:
+      - home
+    restart: unless-stopped
+
   home-postgres:
     container_name: home-postgres
     image: postgres:14.4-alpine
@@ -16,7 +31,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - postgres
+      - home
     restart: unless-stopped
 
   pgadmin-home:
@@ -31,9 +46,9 @@ services:
     ports:
       - "5050:80"
     networks:
-      - postgres
+      - home
     restart: unless-stopped
 
 networks:
-  postgres:
+  home:
     driver: bridge
