@@ -22,21 +22,21 @@ CREATE TABLE tasks(
 	description TEXT, -- task description
 	open BOOLEAN, -- task status
 	parent_id VARCHAR(64), -- parent task id (for subtasks)
-	due_date DATE, -- should be done to this date
-	schedule_date DATE, -- reminder to start working on
+	due_date TIMESTAMP, -- should be done to this date
+	schedule_date TIMESTAMP, -- reminder to start working on
 	hidden BOOLEAN NOT NULL DEFAULT FALSE, -- hide task when created
 
 	PRIMARY KEY(id)
 );
 -- add test values into tasks table --
-INSERT INTO tasks(id, name, create_date, description, open)
+INSERT INTO tasks(id, name, create_date, description, open, hidden)
 	VALUES
-	('78967tuy', 'Create task', CURRENT_TIMESTAMP, 'request from from front', TRUE),
-	('tr6ty98a', 'Update task', CURRENT_TIMESTAMP, 'back + front', TRUE),
-	('o98yloja', 'Delete with warning', CURRENT_TIMESTAMP, 'U do not need to delete, it can be unnecessary', FALSE),
-	('o87guhka', 'deploy it on servers', CURRENT_TIMESTAMP, 'yc in container', TRUE),
-	('8otf6uy8', 'deploy db', CURRENT_TIMESTAMP, 'connect to bucket', FALSE),
-	('juoy8itw', 'run k8s from scratch', CURRENT_TIMESTAMP, '', FALSE);
+	('78967tuy', 'Create task', CURRENT_TIMESTAMP, 'request from from front', FALSE, TRUE),
+	('tr6ty98a', 'Update task', CURRENT_TIMESTAMP, 'back + front', FALSE, FALSE),
+	('o98yloja', 'Delete with warning', CURRENT_TIMESTAMP, 'U do not need to delete, it can be unnecessary', TRUE, FALSE),
+	('o87guhka', 'deploy it on servers', CURRENT_TIMESTAMP, 'yc in container', TRUE, FALSE),
+	('8otf6uy8', 'deploy db', CURRENT_TIMESTAMP, 'connect to bucket', TRUE, FALSE),
+	('juoy8itw', 'run k8s from scratch', CURRENT_TIMESTAMP, '', TRUE, FALSE);
 
 -- create thoughts (aka advices) table --
 CREATE TABLE thoughts(

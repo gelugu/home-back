@@ -74,7 +74,8 @@ fun Application.configureTasksRouting() {
       }
     }
     get("/tasks") {
-      call.respond(HttpStatusCode.OK, Tasks.fetchTasks())
+      val hidden = call.request.queryParameters["hidden"] == "true"
+      call.respond(HttpStatusCode.OK, Tasks.fetchTasks(hidden))
     }
   }
 }

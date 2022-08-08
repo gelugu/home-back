@@ -1,6 +1,5 @@
 package com.gelugu.home.database.tasks
 
-import com.gelugu.home.routing.tasks.TaskCreateDTO
 import com.gelugu.home.routing.tasks.TaskUpdateDTO
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.javatime.timestamp
@@ -12,7 +11,7 @@ object Tasks : Table() {
   private val name = Tasks.varchar("name", 64)
   private val description = Tasks.text("description").default("")
   private val open = Tasks.bool("open").default(true)
-  private val create_date = Tasks.timestamp("create_date").clientDefault{ Date().toInstant() }
+  private val create_date = Tasks.timestamp("create_date").clientDefault { Date().toInstant() }
   private val parent_id = Tasks.varchar("parent_id", 64).nullable().default(null)
   private val due_date = Tasks.timestamp("due_date").nullable().default(null)
   private val schedule_date = Tasks.timestamp("schedule_date").nullable().default(null)
@@ -41,8 +40,14 @@ object Tasks : Table() {
         taskDTO.description?.let { task[description] = it }
         taskDTO.open?.let { task[open] = it }
         taskDTO.parent_id?.let { task[parent_id] = it }
-        taskDTO.due_date?.let { task[due_date] = Date(it).toInstant() }
-        taskDTO.schedule_date?.let { task[schedule_date] = Date(it).toInstant() }
+        taskDTO.due_date?.let {
+          if (it == 0L) task[due_date] = null
+          else task[due_date] = Date(it).toInstant()
+        }
+        taskDTO.schedule_date?.let {
+          if (it == 0L) task[schedule_date] = null
+          else task[schedule_date] = Date(it).toInstant()
+        }
         taskDTO.hidden?.let { task[hidden] = it }
       }
     }
@@ -54,9 +59,10 @@ object Tasks : Table() {
     }
   }
 
-  fun fetchTasks(): List<TaskDTO> {
+  fun fetchTasks(showHidden: Boolean = false): List<TaskDTO> {
     return transaction {
-      Tasks.selectAll().sortedBy { create_date }
+      val tasksQuery = if (showHidden) Tasks.selectAll() else Tasks.select { hidden eq false }
+      tasksQuery.sortedBy { create_date }
         .map { rowToTask(it) }
     }
   }
