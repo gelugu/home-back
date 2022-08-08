@@ -5,7 +5,7 @@ prepare:
 	echo todo
 
 clean-db:
-	rm -r .db-data/postgres
+	rm -r .db-data/postgres || echo "No db data found"
 db: clean-db
 	docker-compose up home-postgres pgadmin-home
 
