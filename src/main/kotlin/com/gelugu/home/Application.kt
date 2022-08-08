@@ -22,24 +22,14 @@ fun main() {
         host = "0.0.0.0",
     ) {
         val logger = log
-        install(CORS) {
-            allowMethod(HttpMethod.Options)
-            allowMethod(HttpMethod.Put)
-            allowMethod(HttpMethod.Delete)
-            allowMethod(HttpMethod.Patch)
-            allowHeader(HttpHeaders.Authorization)
-            allowHeader(HttpHeaders.AccessControlAllowOrigin)
-            allowNonSimpleContentTypes = true
-            allowCredentials = true
-            allowSameOrigin = true
-            allowHost("localhost:3000", listOf("http"))
-            allowHost("home.gelugu.com", listOf("http", "https"))
-            logger.info("CORS enabled for $hosts")
-        }
+
+        installCORS(logger)
+        installJWT(logger)
+        configureSerialization()
+
         configureRouting()
         configureRegistrationRouting()
         configureLoginRouting()
         configureTasksRouting()
-        configureSerialization()
     }.start(wait = true)
 }

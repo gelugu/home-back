@@ -6,7 +6,9 @@ import kotlinx.serialization.json.Json
 @Serializable()
 data class TelegramUpdateRespond(
   val ok: Boolean,
-  val result: List<TelegramUpdateRespondResult>
+  val result: List<TelegramUpdateRespondResult>? = null,
+  val error_code: Int? = null,
+  val description: String? = null
 )
 
 @Serializable

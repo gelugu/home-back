@@ -18,19 +18,21 @@ class TelegramBot(
   private val chatId: String = ""
 ) {
   fun getLastChatId(): TelegramUpdateRespondChat {
-    val responseString = sendRequest("getUpdates").body()
+    val response = Json.decodeFromString<TelegramUpdateRespond>(sendRequest("getUpdates").body())
 
-    if (!responseString.contains("\"ok\":true")) {
-      throw NullPointerException("Telegram token does not exist")
+    println(response)
+
+    if (response.result?.isEmpty() == true) {
+      throw Exception("No recent messages found")
     }
 
-    val response = Json.decodeFromString<TelegramUpdateRespond>(responseString)
-    val latestMessageDate = max(response.result.map { it.message.date })
-    val lastMessage = response.result.find { it.message.date == latestMessageDate }
-      ?: throw NullPointerException("Telegram token does not exist")
-    lastMessage.message.chat
+    response.result?.let { result ->
+      val latestMessageDate = max(result.map { it.message.date })
+      val lastMessage = result.find { it.message.date == latestMessageDate }
+        ?: throw NullPointerException("Can't find last message")
 
-    return lastMessage.message.chat
+      return lastMessage.message.chat
+    } ?: throw NullPointerException("Telegram bot with this token does not exist")
   }
 
   fun sendMessage(text: String): HttpStatusCode {

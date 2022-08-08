@@ -3,10 +3,11 @@ package com.gelugu.home.configurations
 object ApplicationConfig {
   // application
   val serverPort = System.getenv("SERVER_PORT") ?: "8080"
-  var telegramBotToken = System.getenv("TELEGRAM_BOT_API") ?: ""
-  var telegramChatId = System.getenv("TELEGRAM_CHAT_ID") ?: ""
+  const val tokenExpirationTime = 600000 // 10 minutes in milliseconds
   const val codeExpirationTime = 300000 // 5 minutes in milliseconds
-  const val tokenExpirationTime = 3.6e+6 // 5 minutes in milliseconds
+
+  // JWT
+  val jwtSecret = System.getenv("JWT_SECRET") ?: "secret"
 
   // database
   val dbUrl = System.getenv("DB_URL") ?: "localhost"

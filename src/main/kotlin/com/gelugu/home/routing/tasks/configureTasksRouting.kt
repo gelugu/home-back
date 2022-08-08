@@ -4,6 +4,7 @@ import com.gelugu.home.database.tasks.TaskDTO
 import com.gelugu.home.database.tasks.Tasks
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -12,70 +13,73 @@ import java.util.UUID
 
 fun Application.configureTasksRouting() {
   routing {
-    post("/tasks/create") {
-      val task = call.receive<TaskCreateDTO>()
-      if (task.name.isNotEmpty()) {
-        call.application.log.info(task.toString())
-        Tasks.create(
-          TaskDTO(
-            id = UUID.randomUUID().toString(),
-            create_date = Date().time,
-            open = true,
-            hidden = false,
 
-            name = task.name,
-            description = task.description ?: "",
-            parent_id = task.parent_id,
-            due_date = task.due_date,
-            schedule_date = task.schedule_date
+    authenticate("auth-jwt") {
+      post("/tasks/create") {
+        val task = call.receive<TaskCreateDTO>()
+        if (task.name.isNotEmpty()) {
+          call.application.log.info(task.toString())
+          Tasks.create(
+            TaskDTO(
+              id = UUID.randomUUID().toString(),
+              create_date = Date().time,
+              open = true,
+              hidden = false,
+
+              name = task.name,
+              description = task.description ?: "",
+              parent_id = task.parent_id,
+              due_date = task.due_date,
+              schedule_date = task.schedule_date
+            )
           )
-        )
-        call.respond(HttpStatusCode.Created, task)
-      } else {
-        call.respond(HttpStatusCode.BadRequest, "Can't create task with empty name")
-      }
-    }
-    put("/tasks/{id}") {
-      call.parameters["id"]?.let { id ->
-        try {
-          val task = call.receive<TaskUpdateDTO>()
-          Tasks.update(id, task)
-          call.respond(HttpStatusCode.OK, Tasks.fetchTask(id))
-        } catch (e: NoSuchElementException) {
-          call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+          call.respond(HttpStatusCode.Created, task)
+        } else {
+          call.respond(HttpStatusCode.BadRequest, "Can't create task with empty name")
         }
-      } ?: run {
-        call.respond(HttpStatusCode.BadRequest, "Can't update task with id")
       }
-    }
-    delete("/tasks/{id}") {
-      call.parameters["id"]?.let { id ->
-        try {
-          val task = Tasks.fetchTask(id)
-          Tasks.delete(id)
-          call.respond(HttpStatusCode.OK, task)
-        } catch (e: NoSuchElementException) {
-          call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+      put("/tasks/{id}") {
+        call.parameters["id"]?.let { id ->
+          try {
+            val task = call.receive<TaskUpdateDTO>()
+            Tasks.update(id, task)
+            call.respond(HttpStatusCode.OK, Tasks.fetchTask(id))
+          } catch (e: NoSuchElementException) {
+            call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+          }
+        } ?: run {
+          call.respond(HttpStatusCode.BadRequest, "Can't update task with id")
         }
-      } ?: run {
-        call.respond(HttpStatusCode.BadRequest, "Can't delete task with id")
       }
-    }
-    get("/tasks/{id}") {
-      val id = call.parameters["id"]
-      id?.let {
-        try {
-          call.respond(HttpStatusCode.OK, Tasks.fetchTask(id))
-        } catch (e: NoSuchElementException) {
-          call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+      delete("/tasks/{id}") {
+        call.parameters["id"]?.let { id ->
+          try {
+            val task = Tasks.fetchTask(id)
+            Tasks.delete(id)
+            call.respond(HttpStatusCode.OK, task)
+          } catch (e: NoSuchElementException) {
+            call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+          }
+        } ?: run {
+          call.respond(HttpStatusCode.BadRequest, "Can't delete task with id")
         }
-      } ?: run {
-        call.respond(HttpStatusCode.NotFound, "Task with id is Null")
       }
-    }
-    get("/tasks") {
-      val hidden = call.request.queryParameters["hidden"] == "true"
-      call.respond(HttpStatusCode.OK, Tasks.fetchTasks(hidden))
+      get("/tasks/{id}") {
+        val id = call.parameters["id"]
+        id?.let {
+          try {
+            call.respond(HttpStatusCode.OK, Tasks.fetchTask(id))
+          } catch (e: NoSuchElementException) {
+            call.respond(HttpStatusCode.NotFound, "Task with id $id not found")
+          }
+        } ?: run {
+          call.respond(HttpStatusCode.NotFound, "Task with id is Null")
+        }
+      }
+      get("/tasks") {
+        val hidden = call.request.queryParameters["hidden"] == "true"
+        call.respond(HttpStatusCode.OK, Tasks.fetchTasks(hidden))
+      }
     }
   }
 }

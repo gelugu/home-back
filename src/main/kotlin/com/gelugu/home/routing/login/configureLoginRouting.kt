@@ -1,5 +1,7 @@
 package com.gelugu.home.routing.login
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import com.gelugu.home.cache.InMemoryCache
 import com.gelugu.home.configurations.ApplicationConfig
 import com.gelugu.home.features.TelegramBot
@@ -49,10 +51,12 @@ fun Application.configureLoginRouting() {
       }
 
       if (code == InMemoryCache.code) {
-        InMemoryCache.token = UUID.randomUUID().toString()
-        InMemoryCache.tokenDate = Date()
-        call.application.log.info("New token saved in memory (${InMemoryCache.tokenDate})")
-        call.respond(LoginRespondModel(InMemoryCache.token))
+        val token = JWT.create()
+          .withClaim("username", "gelugu") // ToDo
+          .withExpiresAt(Date(System.currentTimeMillis() + ApplicationConfig.tokenExpirationTime))
+          .sign(Algorithm.HMAC256(ApplicationConfig.jwtSecret))
+
+        call.respond(LoginRespondModel(token))
         return@post
       } else {
         val msg = "Incorrect authorization code"

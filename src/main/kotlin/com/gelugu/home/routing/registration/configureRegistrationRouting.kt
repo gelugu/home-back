@@ -44,17 +44,17 @@ fun Application.configureRegistrationRouting() {
       } catch (e: ConnectException) {
         val msg = "ConnectException"
         call.application.log.error(msg)
-        call.respond(HttpStatusCode.InternalServerError, InternalServerError(msg))
+        call.respond(HttpStatusCode.InternalServerError, InternalServerError(e.message ?: msg))
         e.printStackTrace()
-      } catch(e: NullPointerException) {
+      } catch (e: NullPointerException) {
         val msg = "Can't parse telegram chat id from request"
         call.application.log.error(msg)
-        call.respond(HttpStatusCode.InternalServerError, InternalServerError(msg))
+        call.respond(HttpStatusCode.InternalServerError, InternalServerError(e.message ?: msg))
         e.printStackTrace()
-      } catch (e: java.lang.Exception) {
+      } catch (e: Exception) {
         val msg = "Unknown server error, please report to https://t.me/gelugu"
         call.application.log.error(msg)
-        call.respond(HttpStatusCode.InternalServerError, InternalServerError(msg))
+        call.respond(HttpStatusCode.InternalServerError, InternalServerError(e.message ?: msg))
         e.printStackTrace()
       }
 
@@ -76,7 +76,7 @@ fun Application.configureRegistrationRouting() {
         call.application.log.error(msg)
         call.respond(HttpStatusCode.InternalServerError, msg)
         e.printStackTrace()
-      } catch(e: NullPointerException) {
+      } catch (e: NullPointerException) {
         val msg = "Can't parse telegram chat id from request"
         call.application.log.error(msg)
         call.respond(HttpStatusCode.InternalServerError, msg)
