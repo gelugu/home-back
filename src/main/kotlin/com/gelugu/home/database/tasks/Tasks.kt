@@ -1,10 +1,13 @@
 package com.gelugu.home.database.tasks
 
+import com.gelugu.home.cache.InMemoryCache
+import com.gelugu.home.features.TelegramBot
 import com.gelugu.home.routing.tasks.TaskUpdateDTO
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.javatime.timestamp
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
+import kotlin.concurrent.schedule
 
 object Tasks : Table() {
   private val id = Tasks.varchar("id", 64)
@@ -30,6 +33,10 @@ object Tasks : Table() {
         task[schedule_date] = taskDTO.schedule_date?.let { Date(it).toInstant() }
         task[hidden] = taskDTO.hidden
       }
+
+      taskDTO.schedule_date?.let {
+        schedule(taskDTO.id, it)
+      }
     }
   }
 
@@ -45,8 +52,16 @@ object Tasks : Table() {
           else task[due_date] = Date(it).toInstant()
         }
         taskDTO.schedule_date?.let {
-          if (it == 0L) task[schedule_date] = null
-          else task[schedule_date] = Date(it).toInstant()
+          if (it == 0L) {
+            task[schedule_date] = null
+            InMemoryCache.timers[taskId]?.let {
+              cancelTimer(taskId)
+            }
+          }
+          else {
+            task[schedule_date] = Date(it).toInstant()
+            schedule(taskId, it)
+          }
         }
         taskDTO.hidden?.let { task[hidden] = it }
       }
@@ -56,6 +71,7 @@ object Tasks : Table() {
   fun delete(taskId: String) {
     transaction {
       Tasks.deleteWhere { Tasks.id eq taskId }
+      cancelTimer(taskId)
     }
   }
 
@@ -84,4 +100,32 @@ object Tasks : Table() {
     schedule_date = row[schedule_date]?.toEpochMilli(),
     hidden = row[hidden]
   )
+
+  private fun schedule(taskId: String, timestamp: Long) {
+    cancelTimer(taskId)
+
+    val timerTask = Timer(taskId).schedule(Date(timestamp)) {
+      val task = fetchTask(taskId)
+
+      TelegramBot(
+        InMemoryCache.telegramToken,
+        InMemoryCache.telegramChatId
+      ).sendMessage("""
+        ${task.name}
+        
+        ${task.description}
+      """.trimIndent())
+
+      cancelTimer(taskId)
+    }
+
+    InMemoryCache.timers[taskId] = timerTask
+  }
+
+  private fun cancelTimer(taskId: String) {
+    InMemoryCache.timers[taskId]?.let {
+      it.cancel()
+      InMemoryCache.timers.remove(taskId)
+    } ?: throw Exception("Canceled timer didn't found for task \"${taskId}\"")
+  }
 }

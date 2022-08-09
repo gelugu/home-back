@@ -4,7 +4,6 @@ import com.gelugu.home.database.tasks.TaskDTO
 import com.gelugu.home.database.tasks.Tasks
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -14,7 +13,7 @@ import java.util.UUID
 fun Application.configureTasksRouting() {
   routing {
 
-    authenticate("auth-jwt") {
+//    authenticate("auth-jwt") {
       post("/tasks/create") {
         val task = call.receive<TaskCreateDTO>()
         if (task.name.isNotEmpty()) {
@@ -81,5 +80,5 @@ fun Application.configureTasksRouting() {
         call.respond(HttpStatusCode.OK, Tasks.fetchTasks(hidden))
       }
     }
-  }
+//  }
 }
