@@ -17,7 +17,7 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
     - name: Run database
-      run: docker-compose up home-postgres -d
+      run: docker-compose up -d home-postgres
     - name: Execute Gradle tests
       run: ./gradlew test
     - name: Stop database
