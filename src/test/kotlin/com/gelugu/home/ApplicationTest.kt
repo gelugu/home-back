@@ -7,12 +7,14 @@ import io.ktor.client.statement.*
 import kotlin.test.*
 import io.ktor.server.testing.*
 import com.gelugu.home.plugins.*
-import com.gelugu.home.routing.exceptions.InternalServerError
 import com.gelugu.home.routing.registration.configureRegistrationRouting
 import io.ktor.client.call.*
 import org.junit.Test
 
 class ApplicationTest {
+    /**
+     * Root
+     */
     @Test
     fun `Test root`() = testApplication {
         application {

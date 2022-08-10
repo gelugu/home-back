@@ -1,18 +1,18 @@
--- create profile table --
-CREATE TABLE profiles(
+-- create users table --
+CREATE TABLE users(
 	id VARCHAR(64) NOT NULL, -- unique profile id
-	name VARCHAR(64) NOT NULL, -- profile name
-	telegram_bot_token VARCHAR(64), -- profile telegram token
-	telegram_bot_chat_id VARCHAR(64), -- profile telegram chat id
-	bio TEXT, -- profile description
-	jwt_token VARCHAR(64), -- authorization token
-	jwt_token_expiration_date DATE, -- authorization token expiration date
+	login VARCHAR(64) UNIQUE NOT NULL, -- profile name
+	name VARCHAR(64) DEFAULT '', -- profile name
+	telegram_bot_token VARCHAR(64) DEFAULT '', -- profile telegram token
+	telegram_bot_chat_id VARCHAR(10) DEFAULT '', -- profile telegram chat id
+	password VARCHAR(64) DEFAULT '', -- profile password
+	bio TEXT DEFAULT '', -- profile description
 
 	PRIMARY KEY(id)
 );
--- add test values into profile table --
-INSERT INTO profiles(id, name, bio)
-  VALUES ('098go86fg', 'Mikhail', 'ground control to major tom');
+-- add test values into users table --
+INSERT INTO users(id, login, name, bio)
+  VALUES ('098go86fg', 'mike', 'Mikhail', 'ground control to major tom');
 
 -- create tasks table --
 CREATE TABLE tasks(
