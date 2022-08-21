@@ -1,4 +1,4 @@
-package com.gelugu.home.routing.tasks
+package com.gelugu.home.database.tasks
 
 @kotlinx.serialization.Serializable
 data class TaskUpdateDTO(

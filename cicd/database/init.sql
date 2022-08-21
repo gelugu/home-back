@@ -11,12 +11,13 @@ CREATE TABLE users(
 	PRIMARY KEY(id)
 );
 -- add test values into users table --
-INSERT INTO users(id, login, name, bio)
-  VALUES ('098go86fg', 'mike', 'Mikhail', 'ground control to major tom');
+INSERT INTO users(id, login, name, password)
+  VALUES ('098go86fg', 'mike', 'Mikhail', 'iuLuho87Go86f8&!');
 
 -- create tasks table --
 CREATE TABLE tasks(
 	id VARCHAR(64) NOT NULL, -- unique task id
+	user_id VARCHAR(64) NOT NULL, -- owner id
 	name VARCHAR(64) NOT NULL, -- task name
 	create_date TIMESTAMP NOT NULL, -- when task was created
 	description TEXT, -- task description
@@ -29,14 +30,14 @@ CREATE TABLE tasks(
 	PRIMARY KEY(id)
 );
 -- add test values into tasks table --
-INSERT INTO tasks(id, name, create_date, description, open, hidden)
+INSERT INTO tasks(id, user_id, name, create_date, description, open, hidden)
 	VALUES
-	('78967tuy', 'Create task', CURRENT_TIMESTAMP, 'request from from front', FALSE, TRUE),
-	('tr6ty98a', 'Update task', CURRENT_TIMESTAMP, 'back + front', FALSE, FALSE),
-	('o98yloja', 'Delete with warning', CURRENT_TIMESTAMP, 'U do not need to delete, it can be unnecessary', TRUE, FALSE),
-	('o87guhka', 'deploy it on servers', CURRENT_TIMESTAMP, 'yc in container', TRUE, FALSE),
-	('8otf6uy8', 'deploy db', CURRENT_TIMESTAMP, 'connect to bucket', TRUE, FALSE),
-	('juoy8itw', 'run k8s from scratch', CURRENT_TIMESTAMP, '', TRUE, FALSE);
+	('78967tuy', '098go86fg', 'Create task', CURRENT_TIMESTAMP, 'request from from front', FALSE, TRUE),
+	('tr6ty98a', '098go86fg', 'Update task', CURRENT_TIMESTAMP, 'back + front', FALSE, FALSE),
+	('o98yloja', '098go86fg', 'Delete with warning', CURRENT_TIMESTAMP, 'U do not need to delete, it can be unnecessary', TRUE, FALSE),
+	('o87guhka', '098go86fg', 'deploy it on servers', CURRENT_TIMESTAMP, 'yc in container', TRUE, FALSE),
+	('8otf6uy8', '098go86fg', 'deploy db', CURRENT_TIMESTAMP, 'connect to bucket', TRUE, FALSE),
+	('juoy8itw', '098go86fg', 'run k8s from scratch', CURRENT_TIMESTAMP, '', TRUE, FALSE);
 
 -- create thoughts (aka advices) table --
 CREATE TABLE thoughts(

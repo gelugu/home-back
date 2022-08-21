@@ -4,11 +4,7 @@ import java.util.Date
 import java.util.TimerTask
 
 object InMemoryCache {
-  var code: String = ""
-  var codeDate: Date = Date()
-
-  var telegramToken: String = ""
-  var telegramChatId: String = ""
+  val telegramCodes: HashMap<String, Pair<String, Date>> = hashMapOf()
 
   val timers: HashMap<String, TimerTask> = hashMapOf()
 }

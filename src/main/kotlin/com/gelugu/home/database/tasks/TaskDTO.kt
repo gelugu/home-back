@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class TaskDTO(
   val id: String,
+  val user_id: String,
   val name: String,
   val create_date: Long,
   val description: String,

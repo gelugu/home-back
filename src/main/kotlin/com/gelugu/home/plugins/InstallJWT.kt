@@ -22,7 +22,7 @@ fun Application.installJWT(logger: Logger) {
           .build()
       )
       validate { credential ->
-        if (credential.payload.getClaim("username").asString() != "") {
+        if (credential.payload.getClaim("login").asString() != "") {
           JWTPrincipal(credential.payload)
         } else {
           null

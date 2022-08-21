@@ -1,25 +1,20 @@
 package com.gelugu.home
 
 import com.gelugu.home.database.users.CreateUserDTO
-import com.gelugu.home.database.users.UserDTO
 import com.gelugu.home.database.users.Users
 import com.gelugu.home.plugins.configureSerialization
 import com.gelugu.home.plugins.connectDatabase
 import com.gelugu.home.routing.registration.configureRegistrationRouting
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.testing.*
-import io.ktor.util.logging.*
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
-import java.util.UUID
 
-open class UsersTest {
+open class SignUpTest {
   @Test
   fun `Error when create empty user`() = testApplication {
     application {

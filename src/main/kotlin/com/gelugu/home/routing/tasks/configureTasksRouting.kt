@@ -1,7 +1,11 @@
 package com.gelugu.home.routing.tasks
 
+import com.gelugu.home.database.tasks.TaskCreateDTO
 import com.gelugu.home.database.tasks.TaskDTO
+import com.gelugu.home.database.tasks.TaskUpdateDTO
 import com.gelugu.home.database.tasks.Tasks
+import com.gelugu.home.database.users.LoginPasswordDTO
+import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -26,6 +30,7 @@ fun Application.configureTasksRouting() {
               open = true,
               hidden = false,
 
+              user_id = Users.fetchByLogin(call.receive<LoginPasswordDTO>().login).id,
               name = task.name,
               description = task.description ?: "",
               parent_id = task.parent_id,
