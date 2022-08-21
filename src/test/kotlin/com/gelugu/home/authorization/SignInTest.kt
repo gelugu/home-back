@@ -1,4 +1,4 @@
-package com.gelugu.home
+package com.gelugu.home.authorization
 
 import com.gelugu.home.database.users.CreateUserDTO
 import com.gelugu.home.database.users.Users
