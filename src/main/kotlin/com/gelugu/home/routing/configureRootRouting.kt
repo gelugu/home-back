@@ -1,4 +1,4 @@
-package com.gelugu.home.plugins
+package com.gelugu.home.routing
 
 import io.ktor.http.*
 import io.ktor.server.application.*
