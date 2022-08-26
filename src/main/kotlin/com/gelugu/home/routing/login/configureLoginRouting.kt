@@ -11,6 +11,7 @@ import com.gelugu.home.features.TelegramBot
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -23,12 +24,10 @@ fun Application.configureLoginRouting() {
       .withExpiresAt(Date(System.currentTimeMillis() + ApplicationConfig.tokenExpirationTime))
       .sign(Algorithm.HMAC256(ApplicationConfig.jwtSecret))
 
-    authenticate {
+    authenticate("jwt") {
       get("/status") {
-        call.principal<UserIdPrincipal>()?.let {
-          val login = it.name
-          call.respond(HttpStatusCode.OK, login)
-          return@get
+        call.principal<JWTPrincipal>()?.let {
+          call.respondText(it.payload.getClaim("login").asString())
         } ?: call.respond(HttpStatusCode.Unauthorized, "User not exist")
       }
 
@@ -88,7 +87,7 @@ fun Application.configureLoginRouting() {
         }
 
         if (user.telegram_code != code.first) {
-          val msg = "Incorrect authorization code"
+          val msg = "Incorrect login or authorization code"
           call.application.log.error(msg)
           call.respond(HttpStatusCode.Unauthorized, msg)
           return@post
@@ -103,7 +102,7 @@ fun Application.configureLoginRouting() {
       val user = call.receive<LoginPasswordDTO>()
 
       if (user.password != Users.fetchByLogin(user.login).password) {
-        val msg = "Incorrect authorization code"
+        val msg = "Incorrect login or password"
         call.application.log.error(msg)
         call.respond(HttpStatusCode.Unauthorized, msg)
         return@post

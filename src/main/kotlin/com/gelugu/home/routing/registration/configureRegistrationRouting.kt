@@ -16,8 +16,7 @@ fun Application.configureRegistrationRouting() {
     post("/auth/signup") {
       val user = call.receive<CreateUserDTO>()
 
-
-      val authValid = user.password.isNotEmpty() || (user.telegram_bot_token.isNotEmpty() && user.telegram_bot_chat_id.isNotEmpty())
+      val authValid = user.password.isNotEmpty()
       val passwordValid = ApplicationConfig.passwordRegex.matcher(user.password).matches()
       when {
         user.login.isEmpty() -> {
@@ -31,7 +30,8 @@ fun Application.configureRegistrationRouting() {
           throw BadRequestException(msg)
         }
         user.password.isNotEmpty() && !passwordValid -> {
-          val msg = "Password too weak: must includes [digit, lower case letter, upper case letter, special character]"
+          val msg =
+            "Password too weak: must includes [digit, lower case letter, upper case letter, special character] and at least 8 symbols"
           call.respond(HttpStatusCode.BadRequest, msg)
           throw BadRequestException(msg)
         }

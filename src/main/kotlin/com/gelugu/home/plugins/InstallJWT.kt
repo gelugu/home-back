@@ -8,17 +8,14 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
-import io.ktor.util.logging.*
 
-fun Application.installJWT(logger: Logger) {
+fun Application.installJWT() {
   install(Authentication) {
 
-    val secret = ApplicationConfig.jwtSecret
-
-    jwt("auth-jwt") {
+    jwt("jwt") {
       verifier(
         JWT
-          .require(Algorithm.HMAC256(secret))
+          .require(Algorithm.HMAC256(ApplicationConfig.jwtSecret))
           .build()
       )
       validate { credential ->
@@ -33,5 +30,5 @@ fun Application.installJWT(logger: Logger) {
       }
     }
   }
-  logger.info("JWT enabled")
+  log.info("JWT enabled")
 }

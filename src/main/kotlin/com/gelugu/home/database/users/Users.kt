@@ -20,8 +20,6 @@ object Users : Table() {
         user[id] = userId
         user[login] = userDTO.login
         user[name] = userDTO.name
-        user[telegram_bot_token] = userDTO.telegram_bot_token
-        user[telegram_bot_chat_id] = userDTO.telegram_bot_chat_id
         user[password] = userDTO.password
       }
     }

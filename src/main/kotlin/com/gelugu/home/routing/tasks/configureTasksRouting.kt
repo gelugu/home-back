@@ -18,7 +18,7 @@ import java.util.UUID
 fun Application.configureTasksRouting() {
   routing {
 
-    authenticate("auth-jwt") {
+    authenticate("jwt") {
       post("/tasks/create") {
         val task = call.receive<TaskCreateDTO>()
         if (task.name.isNotEmpty()) {

@@ -4,7 +4,7 @@ import com.gelugu.home.configurations.ApplicationConfig
 import io.ktor.server.engine.*
 import io.ktor.server.cio.*
 import com.gelugu.home.plugins.*
-import com.gelugu.home.routing.configureRouting
+import com.gelugu.home.routing.configureRootRouting
 import com.gelugu.home.routing.login.configureLoginRouting
 import com.gelugu.home.routing.registration.configureRegistrationRouting
 import com.gelugu.home.routing.tasks.configureTasksRouting
@@ -20,13 +20,11 @@ fun main() {
         port = ApplicationConfig.serverPort.toInt(),
         host = "0.0.0.0",
     ) {
-        val logger = log
-
-        installCORS(logger)
-        installJWT(logger)
+        installCORS(log)
+        installJWT()
         configureSerialization()
 
-        configureRouting()
+        configureRootRouting()
         configureRegistrationRouting()
         configureLoginRouting()
         configureTasksRouting()
