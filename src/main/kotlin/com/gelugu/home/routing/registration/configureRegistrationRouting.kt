@@ -18,9 +18,15 @@ fun Application.configureRegistrationRouting() {
 
       val authValid = user.password.isNotEmpty()
       val passwordValid = ApplicationConfig.passwordRegex.matcher(user.password).matches()
+      val loginValid = ApplicationConfig.loginRegex.matcher(user.login).matches()
       when {
         user.login.isEmpty() -> {
           val msg = "Login cannot be empty"
+          call.respond(HttpStatusCode.BadRequest, msg)
+          throw BadRequestException(msg)
+        }
+        !loginValid -> {
+          val msg = "Login must starts with a letter and contains only letters, numbers, '-' or '_' (3 to 32 symbols)"
           call.respond(HttpStatusCode.BadRequest, msg)
           throw BadRequestException(msg)
         }
@@ -31,7 +37,7 @@ fun Application.configureRegistrationRouting() {
         }
         user.password.isNotEmpty() && !passwordValid -> {
           val msg =
-            "Password too weak: must includes [digit, lower case letter, upper case letter, special character] and at least 8 symbols"
+            "Password must contains digit, lower case letter, upper case letter, special character] (8 to 24 symbols)"
           call.respond(HttpStatusCode.BadRequest, msg)
           throw BadRequestException(msg)
         }

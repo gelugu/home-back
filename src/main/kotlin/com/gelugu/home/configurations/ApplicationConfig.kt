@@ -7,7 +7,8 @@ object ApplicationConfig {
   val serverPort = System.getenv("SERVER_PORT") ?: "8080"
   const val tokenExpirationTime = 600000 // 10 minutes in milliseconds
   const val codeExpirationTime = 300000 // 5 minutes in milliseconds
-  val passwordRegex = Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%!\\-_?&])(?=\\S+\$).{8,}")
+  val loginRegex = Pattern.compile("^[a-zA-Z][a-zA-Z\\d-_]$")
+  val passwordRegex = Pattern.compile("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#()\$%!\\-_?&]).{8,24}$")
 
   // JWT
   val jwtSecret = System.getenv("JWT_SECRET") ?: "secret"
