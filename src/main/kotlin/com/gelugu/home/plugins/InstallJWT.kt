@@ -19,14 +19,14 @@ fun Application.installJWT() {
           .build()
       )
       validate { credential ->
-        if (credential.payload.getClaim("login").asString() != "") {
+        if (credential.payload.getClaim("id").asString() != "") {
           JWTPrincipal(credential.payload)
         } else {
           null
         }
       }
       challenge { _, _ ->
-        call.respond(HttpStatusCode.Unauthorized, "Token is not valid or has expired")
+        call.respond(HttpStatusCode.Unauthorized, "Token is not exist, not valid or has expired")
       }
     }
   }

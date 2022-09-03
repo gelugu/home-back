@@ -21,7 +21,7 @@ object Tasks : Table() {
   private val schedule_date = Tasks.timestamp("schedule_date").nullable().default(null)
   private val hidden = Tasks.bool("hidden").default(false)
 
-  fun create(taskDTO: TaskDTO) {
+  fun create(userId: String, taskDTO: TaskDTO) {
     transaction {
       Tasks.insert { task ->
         task[id] = taskDTO.id
@@ -39,13 +39,13 @@ object Tasks : Table() {
       val user = Users.fetchById(taskDTO.user_id)
       if (user.telegram_bot_token.isNotEmpty() && user.telegram_bot_chat_id.isNotEmpty()) {
         taskDTO.schedule_date?.let {
-          schedule(taskDTO.id, it, user.telegram_bot_token, user.telegram_bot_chat_id)
+          schedule(userId, taskDTO.id, it, user.telegram_bot_token, user.telegram_bot_chat_id)
         }
       }
     }
   }
 
-  fun update(taskId: String, taskDTO: TaskUpdateDTO) {
+  fun update(userId: String, taskId: String, taskDTO: TaskUpdateDTO) {
     return transaction {
       Tasks.update({ Tasks.id eq taskId }) { task ->
         taskDTO.name?.let { task[name] = it }
@@ -65,9 +65,9 @@ object Tasks : Table() {
             }
           } else {
             task[schedule_date] = Date(it).toInstant()
-            val user = Users.fetchById(fetchTask(taskId).user_id)
+            val user = Users.fetchById(userId)
             if (user.telegram_bot_token.isNotEmpty() && user.telegram_bot_chat_id.isNotEmpty()) {
-              schedule(taskId, it, user.telegram_bot_token, user.telegram_bot_chat_id)
+              schedule(userId, taskId, it, user.telegram_bot_token, user.telegram_bot_chat_id)
             } else {
             }
           }
@@ -94,9 +94,9 @@ object Tasks : Table() {
     }
   }
 
-  fun fetchTask(id: String): TaskDTO {
+  fun fetchTask(userId: String, id: String): TaskDTO {
     return transaction {
-      Tasks.select { Tasks.id eq id }.limit(1).single().let { rowToTask(it) }
+      Tasks.select { user_id eq userId; Tasks.id eq id }.limit(1).single().let { rowToTask(it) }
     }
   }
 
@@ -113,11 +113,11 @@ object Tasks : Table() {
     hidden = row[hidden]
   )
 
-  private fun schedule(taskId: String, timestamp: Long, telegramToken: String, chatId: String) {
+  private fun schedule(userId: String, taskId: String, timestamp: Long, telegramToken: String, chatId: String) {
     cancelTimer(taskId)
 
     val timerTask = Timer(taskId).schedule(Date(timestamp)) {
-      val task = fetchTask(taskId)
+      val task = fetchTask(userId, taskId)
 
       TelegramBot(telegramToken, chatId).sendMessage(
         """
@@ -137,6 +137,6 @@ object Tasks : Table() {
     InMemoryCache.timers[taskId]?.let {
       it.cancel()
       InMemoryCache.timers.remove(taskId)
-    } ?: throw Exception("Canceled timer didn't found for task \"${taskId}\"")
+    }
   }
 }

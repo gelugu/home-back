@@ -26,7 +26,7 @@ fun Application.configureLoginRouting() {
     authenticate("jwt") {
       get("/auth/status") {
         call.principal<JWTPrincipal>()?.let {
-          call.respondText(it.payload.getClaim("login").asString())
+          call.respondText(it.payload.getClaim("id").asString())
         } ?: call.respond(HttpStatusCode.Unauthorized, "User not exist")
       }
 
