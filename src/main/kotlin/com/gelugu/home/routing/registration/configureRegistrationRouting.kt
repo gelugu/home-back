@@ -16,40 +16,42 @@ fun Application.configureRegistrationRouting() {
     post("/auth/signup") {
       val user = call.receive<CreateUserDTO>()
 
-      val authValid = user.password.isNotEmpty()
-      val passwordValid = ApplicationConfig.passwordRegex.matcher(user.password).matches()
-      val loginValid = ApplicationConfig.loginRegex.matcher(user.login).matches()
+      val authInvalid = user.login.isEmpty() || user.password.isEmpty()
+      val passwordInvalid = !ApplicationConfig.passwordRegex.matcher(user.password).matches()
+      val loginInvalid = !ApplicationConfig.loginRegex.matcher(user.login).matches()
+
       when {
-        user.login.isEmpty() -> {
-          val msg = "Login cannot be empty"
+        authInvalid -> {
+          val msg = "Login and password required for registration"
           call.respond(HttpStatusCode.BadRequest, msg)
-          throw BadRequestException(msg)
+          call.application.log.warn(msg)
+          return@post
         }
-        !loginValid -> {
-          val msg = "Login must starts with a letter and contains only letters, numbers, '-' or '_' (3 to 32 symbols)"
-          call.respond(HttpStatusCode.BadRequest, msg)
-          throw BadRequestException(msg)
+        loginInvalid -> {
+          ApplicationConfig.regexExplain[ApplicationConfig.loginRegex]?.let {
+            call.respond(HttpStatusCode.BadRequest, it)
+            call.application.log.warn(it)
+            return@post
+          } ?: throw Exception("Login regex explaining missed")
         }
-        !authValid -> {
-          val msg = "At least on authorization method required (Password or telegram bot integration)"
-          call.respond(HttpStatusCode.BadRequest, msg)
-          throw BadRequestException(msg)
-        }
-        user.password.isNotEmpty() && !passwordValid -> {
-          val msg =
-            "Password must contains digit, lower case letter, upper case letter, special character] (8 to 24 symbols)"
-          call.respond(HttpStatusCode.BadRequest, msg)
-          throw BadRequestException(msg)
+        passwordInvalid -> {
+          ApplicationConfig.regexExplain[ApplicationConfig.passwordRegex]?.let {
+            call.respond(HttpStatusCode.BadRequest, it)
+            call.application.log.warn(it)
+            return@post
+          } ?: throw Exception("Password regex explaining missed")
         }
       }
 
       try {
         val id = Users.create(user)
         call.respond(HttpStatusCode.Created, Users.fetchById(id))
+        call.application.log.info("User created: login(${user.login}) name(${user.name})")
       } catch (e: ExposedSQLException) {
         val msg = "User with same login already exist"
         call.respond(HttpStatusCode.BadRequest, msg)
-        throw BadRequestException(msg)
+        call.application.log.warn(msg)
+        return@post
       }
     }
   }

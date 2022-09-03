@@ -9,6 +9,7 @@ import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -82,8 +83,11 @@ fun Application.configureTasksRouting() {
         }
       }
       get("/tasks") {
-        val hidden = call.request.queryParameters["hidden"] == "true"
-        call.respond(HttpStatusCode.OK, Tasks.fetchTasks(hidden))
+        call.principal<JWTPrincipal>()?.let {
+          val userId = Users.fetchByLogin(it.payload.getClaim("login").asString()).id
+          val hidden = call.request.queryParameters["hidden"] == "true"
+          call.respond(HttpStatusCode.OK, Tasks.fetchTasks(userId, hidden))
+        } ?: call.respond(HttpStatusCode.Unauthorized, "User not exist")
       }
     }
   }

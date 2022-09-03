@@ -1,5 +1,6 @@
 package com.gelugu.home.authorization
 
+import com.gelugu.home.configurations.ApplicationConfig
 import com.gelugu.home.database.users.CreateUserDTO
 import com.gelugu.home.database.users.Users
 import com.gelugu.home.plugins.configureSerialization
@@ -16,6 +17,52 @@ import kotlinx.serialization.encodeToString
 
 open class SignUpTest {
   @Test
+  fun `Success login with name`() = testApplication {
+    connectDatabase()
+    application {
+      configureSerialization()
+      configureRegistrationRouting()
+    }
+    val user = CreateUserDTO(
+      login = "test-login",
+      name = "Test Name",
+      password = "aaBBccDD112233!_",
+    )
+    client.post("/auth/signup") {
+      contentType(ContentType.Application.Json)
+      setBody(Json.encodeToString(user))
+    }.apply {
+      val expectedUser = Users.fetchByLogin(user.login)
+      assertEquals(HttpStatusCode.Created, status)
+      assertEquals(Json.encodeToString(expectedUser), bodyAsText())
+      Users.delete(expectedUser.id)
+    }
+  }
+
+  @Test
+  fun `Success login without name`() = testApplication {
+    connectDatabase()
+    application {
+      configureSerialization()
+      configureRegistrationRouting()
+    }
+    val user = CreateUserDTO(
+      login = "test-login",
+      name = "",
+      password = "aaBBccDD112233!_",
+    )
+    client.post("/auth/signup") {
+      contentType(ContentType.Application.Json)
+      setBody(Json.encodeToString(user))
+    }.apply {
+      val expectedUser = Users.fetchByLogin(user.login)
+      assertEquals(HttpStatusCode.Created, status)
+      assertEquals(Json.encodeToString(expectedUser), bodyAsText())
+      Users.delete(expectedUser.id)
+    }
+  }
+
+  @Test
   fun `Error when create empty user`() = testApplication {
     application {
       configureSerialization()
@@ -26,14 +73,12 @@ open class SignUpTest {
       val user = CreateUserDTO(
         login = "",
         name = "",
-        telegram_bot_token = "",
-        telegram_bot_chat_id = "",
         password = "",
       )
       setBody(Json.encodeToString(user))
     }.apply {
       assertEquals(HttpStatusCode.BadRequest, status)
-      assertEquals(Json.encodeToString("Login cannot be empty"), bodyAsText())
+      assertEquals(Json.encodeToString("Login and password required for registration"), bodyAsText())
     }
   }
 
@@ -46,8 +91,6 @@ open class SignUpTest {
     val user = CreateUserDTO(
       login = "test-only-login",
       name = "",
-      telegram_bot_token = "",
-      telegram_bot_chat_id = "",
       password = "",
     )
     client.post("/auth/signup") {
@@ -55,16 +98,52 @@ open class SignUpTest {
       setBody(Json.encodeToString(user))
     }.apply {
       assertEquals(HttpStatusCode.BadRequest, status)
-      val msg = "At least on authorization method required (Password or telegram bot integration)"
+      val msg = "Login and password required for registration"
       assertEquals(Json.encodeToString(msg), bodyAsText())
     }
   }
 
   @Test
-  fun `Error when incorrect telegram bot passed`() = testApplication {}
+  fun `Error when only name passed`() = testApplication {
+    application {
+      configureSerialization()
+      configureRegistrationRouting()
+    }
+    val user = CreateUserDTO(
+      login = "",
+      name = "Test Name",
+      password = "",
+    )
+    client.post("/auth/signup") {
+      contentType(ContentType.Application.Json)
+      setBody(Json.encodeToString(user))
+    }.apply {
+      assertEquals(HttpStatusCode.BadRequest, status)
+      val msg = "Login and password required for registration"
+      assertEquals(Json.encodeToString(msg), bodyAsText())
+    }
+  }
 
   @Test
-  fun `Error when incorrect telegram chat passed`() = testApplication {}
+  fun `Error when only password passed`() = testApplication {
+    application {
+      configureSerialization()
+      configureRegistrationRouting()
+    }
+    val user = CreateUserDTO(
+      login = "",
+      name = "",
+      password = "aaBBccDD112233!_",
+    )
+    client.post("/auth/signup") {
+      contentType(ContentType.Application.Json)
+      setBody(Json.encodeToString(user))
+    }.apply {
+      assertEquals(HttpStatusCode.BadRequest, status)
+      val msg = "Login and password required for registration"
+      assertEquals(Json.encodeToString(msg), bodyAsText())
+    }
+  }
 
   @Test
   fun `Error when weak password passed`() = testApplication {
@@ -75,22 +154,38 @@ open class SignUpTest {
     client.post("/auth/signup") {
       contentType(ContentType.Application.Json)
       val user = CreateUserDTO(
-        login = "test-weak-user",
+        login = "valid-user",
         name = "",
-        telegram_bot_token = "",
-        telegram_bot_chat_id = "",
         password = "123qwerty",
       )
       setBody(Json.encodeToString(user))
     }.apply {
       assertEquals(HttpStatusCode.BadRequest, status)
-      val msg = "Password too weak: must includes [digit, lower case letter, upper case letter, special character]"
+      val msg = ApplicationConfig.regexExplain[ApplicationConfig.passwordRegex]
       assertEquals(Json.encodeToString(msg), bodyAsText())
     }
   }
 
   @Test
-  fun `Error when username not valid`() = testApplication {}
+  fun `Error when login not valid`() = testApplication {
+    application {
+      configureSerialization()
+      configureRegistrationRouting()
+    }
+    client.post("/auth/signup") {
+      contentType(ContentType.Application.Json)
+      val user = CreateUserDTO(
+        login = "8kk",
+        name = "",
+        password = "aaBBccDD112233!_",
+      )
+      setBody(Json.encodeToString(user))
+    }.apply {
+      assertEquals(HttpStatusCode.BadRequest, status)
+      val msg = ApplicationConfig.regexExplain[ApplicationConfig.loginRegex]
+      assertEquals(Json.encodeToString(msg), bodyAsText())
+    }
+  }
 
   @Test
   fun `Error when user already exist`() = testApplication {
@@ -100,11 +195,9 @@ open class SignUpTest {
       configureRegistrationRouting()
     }
     val user = CreateUserDTO(
-      login = "test-exist-user",
+      login = "test-existing-user",
       name = "",
-      telegram_bot_token = "",
-      telegram_bot_chat_id = "",
-      password = "n90p3ubf08273y0*&BUL",
+      password = "aaBBccDD112233!_",
     )
     client.post("/auth/signup") {
       contentType(ContentType.Application.Json)
@@ -119,77 +212,4 @@ open class SignUpTest {
     }
     Users.delete(Users.fetchByLogin(user.login).id)
   }
-
-  @Test
-  fun `Success when login and telegram passed`() = testApplication {
-    connectDatabase()
-    application {
-      configureSerialization()
-      configureRegistrationRouting()
-    }
-    val user = CreateUserDTO(
-      login = "test-login-telegram-user",
-      name = "Test Name",
-      telegram_bot_token = "telegram_bot_token",
-      telegram_bot_chat_id = "chat_id",
-      password = "",
-    )
-    client.post("/auth/signup") {
-      contentType(ContentType.Application.Json)
-      setBody(Json.encodeToString(user))
-    }.apply {
-      val expectedUser = Users.fetchByLogin(user.login)
-      assertEquals(HttpStatusCode.Created, status)
-      assertEquals(Json.encodeToString(expectedUser), bodyAsText())
-      Users.delete(expectedUser.id)
-    }
-  }
-
-  @Test
-  fun `Success when login and password passed`() = testApplication {
-    connectDatabase()
-    application {
-      configureSerialization()
-      configureRegistrationRouting()
-    }
-    val user = CreateUserDTO(
-      login = "test-login-password-user",
-      name = "Test Name",
-      telegram_bot_token = "",
-      telegram_bot_chat_id = "",
-      password = "n90p3ubf08273y0*&BUL",
-    )
-    client.post("/auth/signup") {
-      contentType(ContentType.Application.Json)
-      setBody(Json.encodeToString(user))
-    }.apply {
-      assertEquals(HttpStatusCode.Created, status)
-      val expectedUser = Users.fetchByLogin(user.login)
-      assertEquals(Json.encodeToString(expectedUser), bodyAsText())
-      Users.delete(expectedUser.id)}
-    }
-
-  @Test
-  fun `Success when login, telegram and password passed`() = testApplication {
-    connectDatabase()
-    application {
-      configureSerialization()
-      configureRegistrationRouting()
-    }
-    val user = CreateUserDTO(
-      login = "test-full-auth-user",
-      name = "Test Name",
-      telegram_bot_token = "telegram_bot_token",
-      telegram_bot_chat_id = "chat_id",
-      password = "n90p3ubf08273y0*&BUL",
-    )
-    client.post("/auth/signup") {
-      contentType(ContentType.Application.Json)
-      setBody(Json.encodeToString(user))
-    }.apply {
-      assertEquals(HttpStatusCode.Created, status)
-      val expectedUser = Users.fetchByLogin(user.login)
-      assertEquals(Json.encodeToString(expectedUser), bodyAsText())
-      Users.delete(expectedUser.id)}
-    }
 }

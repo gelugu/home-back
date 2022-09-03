@@ -19,19 +19,19 @@ import java.util.*
 
 fun Application.configureLoginRouting() {
   routing {
-    fun getToken(user: String) = JWT.create()
-      .withClaim("login", user)
+    fun getToken(userId: String) = JWT.create()
+      .withClaim("id", userId)
       .withExpiresAt(Date(System.currentTimeMillis() + ApplicationConfig.tokenExpirationTime))
       .sign(Algorithm.HMAC256(ApplicationConfig.jwtSecret))
 
     authenticate("jwt") {
-      get("/status") {
+      get("/auth/status") {
         call.principal<JWTPrincipal>()?.let {
           call.respondText(it.payload.getClaim("login").asString())
         } ?: call.respond(HttpStatusCode.Unauthorized, "User not exist")
       }
 
-      get("/send-code") {
+      get("/auth/send-code") {
         val authUser = call.principal<UserIdPrincipal>()
         if (authUser == null) {
           call.respond(HttpStatusCode.Unauthorized, "User not exist")
@@ -77,8 +77,23 @@ fun Application.configureLoginRouting() {
       }
     }
 
-    post("/signin/telegram") {
-      val user = call.receive<LoginTelegramDTO>()
+    post("/auth/signin/telegram") {
+      val user = call.receive<LoginCodeDTO>()
+
+      when {
+        user.login.isEmpty() -> {
+          val msg = "Login is required"
+          call.respond(HttpStatusCode.BadRequest, msg)
+          call.application.log.warn(msg)
+          return@post
+        }
+        user.code.isEmpty() -> {
+          val msg = "Telegram code is required"
+          call.respond(HttpStatusCode.BadRequest, msg)
+          call.application.log.warn(msg)
+          return@post
+        }
+      }
 
       InMemoryCache.telegramCodes[user.login]?.let { code ->
         if (code.second.time + ApplicationConfig.codeExpirationTime < Date().time) {
@@ -86,7 +101,7 @@ fun Application.configureLoginRouting() {
           return@post
         }
 
-        if (user.telegram_code != code.first) {
+        if (user.code != code.first) {
           val msg = "Incorrect login or authorization code"
           call.application.log.error(msg)
           call.respond(HttpStatusCode.Unauthorized, msg)
@@ -98,8 +113,23 @@ fun Application.configureLoginRouting() {
       } ?: call.respond(HttpStatusCode.Unauthorized, "No authorization code for user ${user.login}")
     }
 
-    post("/signin/password") {
+    post("/auth/signin/password") {
       val user = call.receive<LoginPasswordDTO>()
+
+      when {
+        user.login.isEmpty() -> {
+          val msg = "Login is required"
+          call.respond(HttpStatusCode.BadRequest, msg)
+          call.application.log.warn(msg)
+          return@post
+        }
+        user.password.isEmpty() -> {
+          val msg = "Password is required"
+          call.respond(HttpStatusCode.BadRequest, msg)
+          call.application.log.warn(msg)
+          return@post
+        }
+      }
 
       if (user.password != Users.fetchByLogin(user.login).password) {
         val msg = "Incorrect login or password"
