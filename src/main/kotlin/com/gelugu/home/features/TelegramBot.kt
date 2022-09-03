@@ -1,6 +1,5 @@
 package com.gelugu.home.features
 
-import com.gelugu.home.routing.registration.StatusRespondModel
 import com.gelugu.home.routing.registration.TelegramUpdateRespond
 import com.gelugu.home.routing.registration.TelegramUpdateRespondChat
 import io.ktor.http.*
