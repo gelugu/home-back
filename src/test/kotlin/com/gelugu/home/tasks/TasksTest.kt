@@ -163,7 +163,6 @@ open class TasksTest {
     }
     val task = TaskCreateDTO(
       name = "Test task",
-      user_id = userId,
     )
     client.post("/tasks") {
       contentType(ContentType.Application.Json)
@@ -187,7 +186,6 @@ open class TasksTest {
     }
     val task = TaskCreateDTO(
       name = "Test task",
-      user_id = userId,
     )
     client.post("/tasks") {
       contentType(ContentType.Application.Json)
@@ -210,7 +208,6 @@ open class TasksTest {
     }
     val task = TaskCreateDTO(
       name = "Test task",
-      user_id = userId,
     )
     client.post("/tasks") {
       contentType(ContentType.Application.Json)

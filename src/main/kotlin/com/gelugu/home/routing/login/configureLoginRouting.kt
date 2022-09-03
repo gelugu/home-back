@@ -94,7 +94,9 @@ fun Application.configureLoginRouting() {
         }
       }
 
-      InMemoryCache.telegramCodes[user.login]?.let { code ->
+      val userId = Users.fetchByLogin(user.login).id
+
+      InMemoryCache.telegramCodes[userId]?.let { code ->
         if (code.second.time + ApplicationConfig.codeExpirationTime < Date().time) {
           call.respond(HttpStatusCode.Unauthorized, "Code expired")
           return@post
@@ -107,7 +109,7 @@ fun Application.configureLoginRouting() {
           return@post
         }
 
-        val token = getToken(user.login)
+        val token = getToken(userId)
         call.respond(LoginRespondModel(token))
       } ?: call.respond(HttpStatusCode.Unauthorized, "No authorization code for user ${user.login}")
     }
@@ -137,7 +139,7 @@ fun Application.configureLoginRouting() {
         return@post
       }
 
-      val token = getToken(user.login)
+      val token = getToken(Users.fetchByLogin(user.login).id)
       call.respond(LoginRespondModel(token))
     }
   }
