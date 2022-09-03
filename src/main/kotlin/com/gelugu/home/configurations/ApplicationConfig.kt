@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 object ApplicationConfig {
   // application
   val serverPort = System.getenv("SERVER_PORT") ?: "8080"
-  const val tokenExpirationTime = 600000 // 10 minutes in milliseconds
+  const val tokenExpirationTime = 3600000 // 1 hour in milliseconds
   const val codeExpirationTime = 300000 // 5 minutes in milliseconds
   // starts with a letter and contains letters, numbers and
   val loginRegex: Pattern = Pattern.compile("^[a-zA-Z][a-zA-Z\\d-_]+$")
