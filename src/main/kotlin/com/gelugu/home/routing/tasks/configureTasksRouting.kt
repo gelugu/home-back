@@ -8,7 +8,6 @@ import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -20,24 +19,15 @@ fun Application.configureTasksRouting() {
 
     authenticate("jwt") {
 
-      suspend fun getUserId(call: ApplicationCall): String? {
-        return try {
-          Users.fetchById(call.principal<JWTPrincipal>()!!.payload.getClaim("id").asString()).id
-        } catch (e: Exception) {
-          call.respond(HttpStatusCode.Unauthorized, "User not found")
-          null
-        }
-      }
-
       get("/tasks") {
-        getUserId(call)?.let { userId ->
+        Users.getUserIdFromJWT(call)?.let { userId ->
           println("success")
           call.respond(HttpStatusCode.OK, Tasks.fetchTasks(userId))
         }
       }
 
       get("/tasks/{id}") {
-        getUserId(call)?.let { userId ->
+        Users.getUserIdFromJWT(call)?.let { userId ->
           val id = call.parameters["id"]
           id?.let { taskId ->
             try {
@@ -52,7 +42,7 @@ fun Application.configureTasksRouting() {
       }
 
       post("/tasks") {
-        getUserId(call)?.let { userId ->
+        Users.getUserIdFromJWT(call)?.let { userId ->
           val task = call.receive<TaskCreateDTO>()
           if (task.name.isNotEmpty()) {
             call.application.log.info(task.toString())
@@ -80,7 +70,7 @@ fun Application.configureTasksRouting() {
       }
 
       put("/tasks/{id}") {
-        getUserId(call)?.let { userId ->
+        Users.getUserIdFromJWT(call)?.let { userId ->
           call.parameters["id"]?.let { id ->
             try {
               val task = call.receive<TaskUpdateDTO>()
@@ -96,7 +86,7 @@ fun Application.configureTasksRouting() {
       }
 
       delete("/tasks/{id}") {
-        getUserId(call)?.let { userId ->
+        Users.getUserIdFromJWT(call)?.let { userId ->
           call.parameters["id"]?.let { id ->
             try {
               val task = Tasks.fetchTask(userId, id)

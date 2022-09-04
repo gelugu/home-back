@@ -8,6 +8,7 @@ import com.gelugu.home.routing.configureRootRouting
 import com.gelugu.home.routing.login.configureLoginRouting
 import com.gelugu.home.routing.registration.configureRegistrationRouting
 import com.gelugu.home.routing.tasks.configureTasksRouting
+import com.gelugu.home.routing.users.configureUsersRouting
 import io.ktor.server.application.*
 
 fun main() {
@@ -27,6 +28,7 @@ fun main() {
         configureRootRouting()
         configureRegistrationRouting()
         configureLoginRouting()
+        configureUsersRouting()
         configureTasksRouting()
     }.start(wait = true)
 }

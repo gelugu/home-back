@@ -1,5 +1,11 @@
 package com.gelugu.home.database.users
 
+import com.gelugu.home.routing.users.UserProfileDTO
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.response.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -72,4 +78,22 @@ object Users : Table() {
     password = row[password],
     bio = row[bio],
   )
+
+  suspend fun getUserIdFromJWT(call: ApplicationCall): String? {
+    return try {
+      Users.fetchById(call.principal<JWTPrincipal>()!!.payload.getClaim("id").asString()).id
+    } catch (e: Exception) {
+      call.respond(HttpStatusCode.Unauthorized, "User not found")
+      null
+    }
+  }
+
+  fun userToProfile(userDTO: UserDTO): UserProfileDTO = UserProfileDTO(
+    login = userDTO.login,
+    name = userDTO.name,
+    telegram_bot_token = userDTO.telegram_bot_token,
+    telegram_bot_chat_id = userDTO.telegram_bot_chat_id,
+    bio = userDTO.bio,
+  )
+
 }
