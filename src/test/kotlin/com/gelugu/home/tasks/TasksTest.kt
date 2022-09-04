@@ -238,7 +238,6 @@ open class TasksTest {
       parent_id = task.parent_id,
       due_date = task.due_date,
       schedule_date = task.schedule_date,
-      hidden = !task.hidden,
     )
     val updateTask = TaskUpdateDTO(
       name = newTask.name,
@@ -247,7 +246,6 @@ open class TasksTest {
       parent_id = newTask.parent_id,
       due_date = newTask.due_date,
       schedule_date = newTask.schedule_date,
-      hidden = newTask.hidden,
     )
     client.put("/tasks/${task.id}") {
       contentType(ContentType.Application.Json)

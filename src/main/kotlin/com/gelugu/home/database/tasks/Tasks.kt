@@ -19,7 +19,6 @@ object Tasks : Table() {
   private val parent_id = Tasks.varchar("parent_id", 64).nullable().default(null)
   private val due_date = Tasks.timestamp("due_date").nullable().default(null)
   private val schedule_date = Tasks.timestamp("schedule_date").nullable().default(null)
-  private val hidden = Tasks.bool("hidden").default(false)
 
   fun create(userId: String, taskDTO: TaskDTO) {
     transaction {
@@ -33,7 +32,6 @@ object Tasks : Table() {
         task[parent_id] = taskDTO.parent_id
         task[due_date] = taskDTO.due_date?.let { Date(it).toInstant() }
         task[schedule_date] = taskDTO.schedule_date?.let { Date(it).toInstant() }
-        task[hidden] = taskDTO.hidden
       }
 
       val user = Users.fetchById(taskDTO.user_id)
@@ -72,7 +70,6 @@ object Tasks : Table() {
             }
           }
         }
-        taskDTO.hidden?.let { task[hidden] = it }
       }
     }
   }
@@ -84,11 +81,9 @@ object Tasks : Table() {
     }
   }
 
-  fun fetchTasks(userId: String, showHidden: Boolean = false): List<TaskDTO> {
+  fun fetchTasks(userId: String): List<TaskDTO> {
     return transaction {
-      val tasksQuery =
-        if (showHidden) Tasks.select { user_id eq userId }
-        else Tasks.select { hidden eq false; user_id eq userId }
+      val tasksQuery = Tasks.select { user_id eq userId }
       tasksQuery.sortedBy { create_date }
         .map { rowToTask(it) }
     }
@@ -110,7 +105,6 @@ object Tasks : Table() {
     parent_id = row[parent_id],
     due_date = row[due_date]?.toEpochMilli(),
     schedule_date = row[schedule_date]?.toEpochMilli(),
-    hidden = row[hidden]
   )
 
   private fun schedule(userId: String, taskId: String, timestamp: Long, telegramToken: String, chatId: String) {

@@ -32,8 +32,7 @@ fun Application.configureTasksRouting() {
       get("/tasks") {
         getUserId(call)?.let { userId ->
           println("success")
-          val hidden = call.request.queryParameters["hidden"] == "true"
-          call.respond(HttpStatusCode.OK, Tasks.fetchTasks(userId, hidden))
+          call.respond(HttpStatusCode.OK, Tasks.fetchTasks(userId))
         }
       }
 
@@ -64,7 +63,6 @@ fun Application.configureTasksRouting() {
                 id = taskId,
                 create_date = Date().time,
                 open = true,
-                hidden = false,
 
                 user_id = userId,
                 name = task.name,

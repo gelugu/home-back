@@ -9,5 +9,4 @@ data class TaskUpdateDTO(
   val parent_id: String? = null,
   val due_date: Long? = null,
   val schedule_date: Long? = null,
-  val hidden: Boolean? = null
 )

@@ -13,5 +13,4 @@ class TaskDTO(
   val parent_id: String?,
   val due_date: Long?,
   val schedule_date: Long?,
-  val hidden: Boolean
 )
