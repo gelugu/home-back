@@ -4,7 +4,7 @@ services:
 
   home-back:
     container_name: home-back
-    image: gelugu/home-db:0.0.1
+    image: gelugu/home-db:1.0.0
     environment:
       DB_URL: home-postgres
       DB_NAME: home-postgres-db

@@ -1,5 +1,10 @@
 package com.gelugu.home.database.users
 
+import com.gelugu.home.database.tracks.Tracks
+import com.gelugu.home.database.tracks.dto.TrackDTO
+import com.gelugu.home.database.users.dto.CreateUserDTO
+import com.gelugu.home.database.users.dto.UpdateUserDTO
+import com.gelugu.home.database.users.dto.UserDTO
 import com.gelugu.home.routing.users.UserProfileDTO
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -29,6 +34,7 @@ object Users : Table() {
         user[password] = userDTO.password
       }
     }
+    Tracks.create(userId, TrackDTO(UUID.randomUUID().toString(), "default", description = "", userId))
     return userId
   }
 
@@ -47,14 +53,10 @@ object Users : Table() {
 
   fun delete(userId: String) {
     transaction {
-      // delete all users tasks and other staff
+      Tracks.fetchAll(userId).map { it.id }.forEach {
+        Tracks.delete(it)
+      }
       Users.deleteWhere { Users.id eq userId }
-    }
-  }
-
-  fun fetchAll(): List<UserDTO> {
-    return transaction {
-      Users.selectAll().map { rowToTask(it) }
     }
   }
 
@@ -63,6 +65,7 @@ object Users : Table() {
       Users.select { Users.id eq id }.limit(1).single().let { rowToTask(it) }
     }
   }
+
   fun fetchByLogin(login: String): UserDTO {
     return transaction {
       Users.select { Users.login eq login }.limit(1).single().let { rowToTask(it) }
@@ -81,7 +84,7 @@ object Users : Table() {
 
   suspend fun getUserIdFromJWT(call: ApplicationCall): String? {
     return try {
-      Users.fetchById(call.principal<JWTPrincipal>()!!.payload.getClaim("id").asString()).id
+      this.fetchById(call.principal<JWTPrincipal>()!!.payload.getClaim("id").asString()).id
     } catch (e: Exception) {
       call.respond(HttpStatusCode.Unauthorized, "User not found")
       null

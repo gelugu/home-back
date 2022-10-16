@@ -1,7 +1,7 @@
 package com.gelugu.home.authorization
 
 import com.gelugu.home.configurations.ApplicationConfig
-import com.gelugu.home.database.users.CreateUserDTO
+import com.gelugu.home.database.users.dto.CreateUserDTO
 import com.gelugu.home.database.users.Users
 import com.gelugu.home.plugins.configureSerialization
 import com.gelugu.home.plugins.connectDatabase

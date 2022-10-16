@@ -1,6 +1,6 @@
 package com.gelugu.home.routing.users
 
-import com.gelugu.home.database.users.UpdateUserDTO
+import com.gelugu.home.database.users.dto.UpdateUserDTO
 import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*

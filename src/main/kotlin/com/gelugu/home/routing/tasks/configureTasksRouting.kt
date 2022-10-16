@@ -1,9 +1,10 @@
 package com.gelugu.home.routing.tasks
 
-import com.gelugu.home.database.tasks.TaskCreateDTO
-import com.gelugu.home.database.tasks.TaskDTO
-import com.gelugu.home.database.tasks.TaskUpdateDTO
+import com.gelugu.home.database.tasks.dto.TaskCreateDTO
+import com.gelugu.home.database.tasks.dto.TaskDTO
+import com.gelugu.home.database.tasks.dto.TaskUpdateDTO
 import com.gelugu.home.database.tasks.Tasks
+import com.gelugu.home.database.tracks.Tracks
 import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -17,16 +18,17 @@ import java.util.UUID
 fun Application.configureTasksRouting() {
   routing {
 
+    val rootRoute = "/tasks"
+    val idRoute = "$rootRoute/{id}"
+
     authenticate("jwt") {
 
-      get("/tasks") {
-        Users.getUserIdFromJWT(call)?.let { userId ->
-          println("success")
-          call.respond(HttpStatusCode.OK, Tasks.fetchTasks(userId))
-        }
+      get(rootRoute) {
+        val trackId = call.request.queryParameters["track"] ?: "default"
+        call.respond(HttpStatusCode.OK, Tasks.fetchTasks(trackId))
       }
 
-      get("/tasks/{id}") {
+      get(idRoute) {
         Users.getUserIdFromJWT(call)?.let { userId ->
           val id = call.parameters["id"]
           id?.let { taskId ->
@@ -41,7 +43,7 @@ fun Application.configureTasksRouting() {
         }
       }
 
-      post("/tasks") {
+      post(rootRoute) {
         Users.getUserIdFromJWT(call)?.let { userId ->
           val task = call.receive<TaskCreateDTO>()
           if (task.name.isNotEmpty()) {
@@ -54,7 +56,7 @@ fun Application.configureTasksRouting() {
                 create_date = Date().time,
                 open = true,
 
-                user_id = userId,
+                track_id = task.track_id,
                 name = task.name,
                 description = task.description ?: "",
                 parent_id = task.parent_id,
@@ -69,7 +71,7 @@ fun Application.configureTasksRouting() {
         }
       }
 
-      put("/tasks/{id}") {
+      put(idRoute) {
         Users.getUserIdFromJWT(call)?.let { userId ->
           call.parameters["id"]?.let { id ->
             try {
@@ -85,7 +87,7 @@ fun Application.configureTasksRouting() {
         }
       }
 
-      delete("/tasks/{id}") {
+      delete(idRoute) {
         Users.getUserIdFromJWT(call)?.let { userId ->
           call.parameters["id"]?.let { id ->
             try {

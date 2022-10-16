@@ -1,4 +1,4 @@
-container_name=gelugu/home-back:0.0.1
+container_name=gelugu/home-back:1.0.0
 terraform_dir=cicd/terraform
 
 prepare:

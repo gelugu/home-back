@@ -1,39 +1,40 @@
--- create users table --
 CREATE TABLE users(
-	id VARCHAR(64) NOT NULL, -- unique profile id
-	login VARCHAR(64) UNIQUE NOT NULL, -- profile name
-	name VARCHAR(64) DEFAULT '', -- profile name
-	telegram_bot_token VARCHAR(64) DEFAULT '', -- profile telegram token
-	telegram_bot_chat_id VARCHAR(10) DEFAULT '', -- profile telegram chat id
-	password VARCHAR(64) DEFAULT '', -- profile password
-	bio TEXT DEFAULT '', -- profile description
-
-	PRIMARY KEY(id)
+	id VARCHAR(64) NOT NULL PRIMARY KEY,
+	login VARCHAR(64) UNIQUE NOT NULL,
+	name VARCHAR(64) DEFAULT '',
+	telegram_bot_token VARCHAR(64) DEFAULT '',
+	telegram_bot_chat_id VARCHAR(10) DEFAULT '',
+	password VARCHAR(64) DEFAULT '',
+	bio TEXT DEFAULT ''
 );
--- add test values into users table --
 INSERT INTO users(id, login, name, password)
   VALUES ('098go86fg', 'mike', 'Mikhail', 'iuLuho87Go86f8&!');
 
--- create tasks table --
-CREATE TABLE tasks(
-	id VARCHAR(64) NOT NULL, -- unique task id
-	user_id VARCHAR(64) NOT NULL, -- owner id
-	name VARCHAR(64) NOT NULL, -- task name
-	create_date TIMESTAMP NOT NULL, -- when task was created
-	description TEXT, -- task description
-	open BOOLEAN, -- task status
-	parent_id VARCHAR(64), -- parent task id (for subtasks)
-	due_date TIMESTAMP, -- should be done to this date
-	schedule_date TIMESTAMP, -- reminder to start working on
-
-	PRIMARY KEY(id)
+CREATE TABLE tracks(
+	id VARCHAR(64) NOT NULL PRIMARY KEY,
+	name VARCHAR(64) DEFAULT '',
+	description TEXT DEFAULT '',
+	owner VARCHAR(64) REFERENCES users(id)
 );
--- add test values into tasks table --
-INSERT INTO tasks(id, user_id, name, create_date, description, open)
+INSERT INTO tracks(id, name, owner)
+  VALUES ('default', 'default', '098go86fg');
+
+CREATE TABLE tasks(
+	id VARCHAR(64) NOT NULL PRIMARY KEY,
+	track_id VARCHAR(64) REFERENCES tracks(id),
+	name VARCHAR(64) NOT NULL,
+	create_date TIMESTAMP NOT NULL,
+	description TEXT,
+	open BOOLEAN,
+	parent_id VARCHAR(64),
+	due_date TIMESTAMP,
+	schedule_date TIMESTAMP
+);
+INSERT INTO tasks(id, name, create_date, description, open, track_id)
 	VALUES
-	('78967tuy', '098go86fg', 'Create task', CURRENT_TIMESTAMP, 'request from from front', FALSE),
-	('tr6ty98a', '098go86fg', 'Update task', CURRENT_TIMESTAMP, 'back + front', FALSE),
-	('o98yloja', '098go86fg', 'Delete with warning', CURRENT_TIMESTAMP, 'U do not need to delete, it can be unnecessary', TRUE),
-	('o87guhka', '098go86fg', 'deploy it on servers', CURRENT_TIMESTAMP, 'yc in container', TRUE),
-	('8otf6uy8', '098go86fg', 'deploy db', CURRENT_TIMESTAMP, 'connect to bucket', TRUE),
-	('juoy8itw', '098go86fg', 'run k8s from scratch', CURRENT_TIMESTAMP, '', TRUE);
+	('78967tuy', 'Create task', CURRENT_TIMESTAMP, 'request from from front', FALSE, 'default'),
+	('tr6ty98a', 'Update task', CURRENT_TIMESTAMP, 'back + front', FALSE, 'default'),
+	('o98yloja', 'Delete with warning', CURRENT_TIMESTAMP, 'U do not need to delete, it can be unnecessary', TRUE, 'default'),
+	('o87guhka', 'deploy it on servers', CURRENT_TIMESTAMP, 'yc in container', TRUE, 'default'),
+	('8otf6uy8', 'deploy db', CURRENT_TIMESTAMP, 'connect to bucket', TRUE, 'default'),
+	('juoy8itw', 'run k8s from scratch', CURRENT_TIMESTAMP, '', TRUE, 'default');

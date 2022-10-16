@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.gelugu.home.cache.InMemoryCache
 import com.gelugu.home.configurations.ApplicationConfig
-import com.gelugu.home.database.users.LoginPasswordDTO
+import com.gelugu.home.database.users.dto.LoginPasswordDTO
 import com.gelugu.home.database.users.Users
 import com.gelugu.home.features.TelegramBot
 import io.ktor.http.*

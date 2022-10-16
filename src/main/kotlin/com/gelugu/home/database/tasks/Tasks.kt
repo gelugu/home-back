@@ -1,6 +1,8 @@
 package com.gelugu.home.database.tasks
 
 import com.gelugu.home.cache.InMemoryCache
+import com.gelugu.home.database.tasks.dto.TaskDTO
+import com.gelugu.home.database.tasks.dto.TaskUpdateDTO
 import com.gelugu.home.database.users.Users
 import com.gelugu.home.features.TelegramBot
 import org.jetbrains.exposed.sql.*
@@ -11,7 +13,7 @@ import kotlin.concurrent.schedule
 
 object Tasks : Table() {
   private val id = Tasks.varchar("id", 64)
-  private val user_id = Tasks.varchar("user_id", 64)
+  private val track_id = Tasks.varchar("track_id", 64)
   private val name = Tasks.varchar("name", 64)
   private val description = Tasks.text("description").default("")
   private val open = Tasks.bool("open").default(true)
@@ -24,7 +26,7 @@ object Tasks : Table() {
     transaction {
       Tasks.insert { task ->
         task[id] = taskDTO.id
-        task[user_id] = taskDTO.user_id
+        task[track_id] = taskDTO.track_id
         task[name] = taskDTO.name
         task[create_date] = Date(taskDTO.create_date).toInstant()
         task[description] = taskDTO.description
@@ -34,7 +36,7 @@ object Tasks : Table() {
         task[schedule_date] = taskDTO.schedule_date?.let { Date(it).toInstant() }
       }
 
-      val user = Users.fetchById(taskDTO.user_id)
+      val user = Users.fetchById(userId)
       if (user.telegram_bot_token.isNotEmpty() && user.telegram_bot_chat_id.isNotEmpty()) {
         taskDTO.schedule_date?.let {
           schedule(userId, taskDTO.id, it, user.telegram_bot_token, user.telegram_bot_chat_id)
@@ -47,7 +49,7 @@ object Tasks : Table() {
     return transaction {
       Tasks.update({ Tasks.id eq taskId }) { task ->
         taskDTO.name?.let { task[name] = it }
-        taskDTO.user_id?.let { task[user_id] = it }
+        taskDTO.track_id?.let { task[track_id] = it }
         taskDTO.description?.let { task[description] = it }
         taskDTO.open?.let { task[open] = it }
         taskDTO.parent_id?.let { task[parent_id] = it }
@@ -81,23 +83,23 @@ object Tasks : Table() {
     }
   }
 
-  fun fetchTasks(userId: String): List<TaskDTO> {
+  fun fetchTasks(trackId: String): List<TaskDTO> {
     return transaction {
-      val tasksQuery = Tasks.select { user_id eq userId }
+      val tasksQuery = Tasks.select { track_id eq trackId }
       tasksQuery.sortedBy { create_date }
         .map { rowToTask(it) }
     }
   }
 
-  fun fetchTask(userId: String, id: String): TaskDTO {
+  fun fetchTask(taskId: String, id: String): TaskDTO {
     return transaction {
-      Tasks.select { user_id eq userId; Tasks.id eq id }.limit(1).single().let { rowToTask(it) }
+      Tasks.select { track_id eq taskId; Tasks.id eq id }.limit(1).single().let { rowToTask(it) }
     }
   }
 
   private fun rowToTask(row: ResultRow): TaskDTO = TaskDTO(
     id = row[id],
-    user_id = row[user_id],
+    track_id = row[track_id],
     name = row[name],
     create_date = row[create_date].toEpochMilli(),
     description = row[description],
@@ -114,11 +116,9 @@ object Tasks : Table() {
       val task = fetchTask(userId, taskId)
 
       TelegramBot(telegramToken, chatId).sendMessage(
-        """
-        ${task.name}
-        
-        ${task.description}
-      """.trimIndent()
+        task.name +
+            "\n\n" +
+            task.description
       )
 
       cancelTimer(taskId)

@@ -1,4 +1,4 @@
-package com.gelugu.home.database.users
+package com.gelugu.home.database.users.dto
 
 import kotlinx.serialization.Serializable
 

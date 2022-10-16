@@ -3,7 +3,7 @@ package com.gelugu.home.user
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.gelugu.home.configurations.ApplicationConfig
-import com.gelugu.home.database.users.UpdateUserDTO
+import com.gelugu.home.database.users.dto.UpdateUserDTO
 import com.gelugu.home.database.users.Users
 import com.gelugu.home.plugins.configureSerialization
 import com.gelugu.home.plugins.connectDatabase

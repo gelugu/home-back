@@ -1,7 +1,7 @@
 package com.gelugu.home.routing.registration
 
 import com.gelugu.home.configurations.ApplicationConfig
-import com.gelugu.home.database.users.CreateUserDTO
+import com.gelugu.home.database.users.dto.CreateUserDTO
 import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*

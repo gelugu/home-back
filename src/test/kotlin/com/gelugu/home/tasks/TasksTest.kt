@@ -3,9 +3,9 @@ package com.gelugu.home.tasks
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.gelugu.home.configurations.ApplicationConfig
-import com.gelugu.home.database.tasks.TaskCreateDTO
-import com.gelugu.home.database.tasks.TaskDTO
-import com.gelugu.home.database.tasks.TaskUpdateDTO
+import com.gelugu.home.database.tasks.dto.TaskCreateDTO
+import com.gelugu.home.database.tasks.dto.TaskDTO
+import com.gelugu.home.database.tasks.dto.TaskUpdateDTO
 import com.gelugu.home.database.tasks.Tasks
 import com.gelugu.home.plugins.configureSerialization
 import com.gelugu.home.plugins.connectDatabase
@@ -31,6 +31,7 @@ open class TasksTest {
     .withClaim("id", "i-am-not-exist")
     .withExpiresAt(Date(System.currentTimeMillis() + ApplicationConfig.tokenExpirationTime))
     .sign(Algorithm.HMAC256(ApplicationConfig.jwtSecret))
+  private val trackId = "default"
 
   @Test
   fun `Get all tasks for existing user`() = testApplication {
@@ -163,6 +164,7 @@ open class TasksTest {
     }
     val task = TaskCreateDTO(
       name = "Test task",
+      track_id = trackId
     )
     client.post("/tasks") {
       contentType(ContentType.Application.Json)
@@ -186,6 +188,7 @@ open class TasksTest {
     }
     val task = TaskCreateDTO(
       name = "Test task",
+      track_id = trackId
     )
     client.post("/tasks") {
       contentType(ContentType.Application.Json)
@@ -208,6 +211,7 @@ open class TasksTest {
     }
     val task = TaskCreateDTO(
       name = "Test task",
+      track_id = trackId
     )
     client.post("/tasks") {
       contentType(ContentType.Application.Json)
@@ -230,7 +234,7 @@ open class TasksTest {
     val task = Tasks.fetchTasks(userId)[0]
     val newTask = TaskDTO(
       id = task.id,
-      user_id = task.user_id,
+      track_id = task.track_id,
       name = task.name + "new",
       create_date = task.create_date,
       description = task.description + "new",

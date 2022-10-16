@@ -10,6 +10,6 @@ FROM openjdk:17
 
 RUN mkdir /app
 
-COPY --from=builder /app/build/libs/home-back-0.0.1-all.jar /app/app.jar
+COPY --from=builder /app/build/libs/home-back-1.0.0-all.jar /app/app.jar
 
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
