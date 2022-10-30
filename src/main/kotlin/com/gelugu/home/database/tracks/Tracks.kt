@@ -11,6 +11,7 @@ object Tracks : Table() {
   private val name = Tracks.varchar("name", 64)
   private val description = Tracks.text("description")
   private val owner = Tracks.varchar("owner", 64)
+  private val closed_tasks = Tracks.integer("closed_tasks")
 
   fun create(userId: String, trackDTO: TrackDTO) {
     transaction {
@@ -19,6 +20,7 @@ object Tracks : Table() {
         track[name] = trackDTO.name
         track[description] = trackDTO.description
         track[owner] = userId
+        track[closed_tasks] = 0
       }
     }
   }
@@ -62,5 +64,6 @@ object Tracks : Table() {
     name = row[name],
     description = row[description],
     owner = row[owner],
+    closed_tasks = Tasks.fetchClosedTasks(row[id]).size,
   )
 }

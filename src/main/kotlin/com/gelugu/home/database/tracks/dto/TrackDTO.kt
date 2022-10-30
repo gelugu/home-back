@@ -8,4 +8,5 @@ class TrackDTO(
   val name: String,
   val description: String,
   val owner: String,
+  val closed_tasks: Int,
 )

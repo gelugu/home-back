@@ -4,7 +4,6 @@ import com.gelugu.home.database.tasks.dto.TaskCreateDTO
 import com.gelugu.home.database.tasks.dto.TaskDTO
 import com.gelugu.home.database.tasks.dto.TaskUpdateDTO
 import com.gelugu.home.database.tasks.Tasks
-import com.gelugu.home.database.tracks.Tracks
 import com.gelugu.home.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -20,10 +19,16 @@ fun Application.configureTasksRouting() {
 
     val rootRoute = "/tasks"
     val idRoute = "$rootRoute/{id}"
+    val closedRoute = "$rootRoute/closed"
 
     authenticate("jwt") {
 
       get(rootRoute) {
+        val trackId = call.request.queryParameters["track"] ?: "default"
+        call.respond(HttpStatusCode.OK, Tasks.fetchTasks(trackId))
+      }
+
+      get(closedRoute) {
         val trackId = call.request.queryParameters["track"] ?: "default"
         call.respond(HttpStatusCode.OK, Tasks.fetchTasks(trackId))
       }

@@ -34,7 +34,7 @@ object Users : Table() {
         user[password] = userDTO.password
       }
     }
-    Tracks.create(userId, TrackDTO(UUID.randomUUID().toString(), "default", description = "", userId))
+    Tracks.create(userId, TrackDTO(UUID.randomUUID().toString(), "default", description = "", userId, 0))
     return userId
   }
 

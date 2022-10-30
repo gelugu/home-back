@@ -91,6 +91,14 @@ object Tasks : Table() {
     }
   }
 
+  fun fetchClosedTasks(trackId: String): List<TaskDTO> {
+    return transaction {
+      val tasksQuery = Tasks.select { track_id eq trackId and not(open) }
+      tasksQuery.map { rowToTask(it) }
+
+    }
+  }
+
   fun fetchTask(taskId: String, id: String): TaskDTO {
     return transaction {
       Tasks.select { track_id eq taskId; Tasks.id eq id }.limit(1).single().let { rowToTask(it) }

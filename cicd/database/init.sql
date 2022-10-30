@@ -14,7 +14,8 @@ CREATE TABLE tracks(
 	id VARCHAR(64) NOT NULL PRIMARY KEY,
 	name VARCHAR(64) DEFAULT '',
 	description TEXT DEFAULT '',
-	owner VARCHAR(64) REFERENCES users(id)
+	owner VARCHAR(64) REFERENCES users(id),
+	closed_tasks INTEGER DEFAULT 0
 );
 INSERT INTO tracks(id, name, owner)
   VALUES ('default', 'default', '098go86fg');

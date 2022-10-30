@@ -55,6 +55,7 @@ fun Application.configureTracksRouting() {
                 owner = userId,
                 name = track.name,
                 description = track.description,
+                closed_tasks = 0
               )
             )
             call.respond(HttpStatusCode.Created, Tracks.fetchOne(userId, trackId))
